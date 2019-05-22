@@ -5,21 +5,17 @@ knitr::opts_chunk$set(
   # , tidy.opts = list(width.cutoff = 160, tidy = FALSE)
 )
 
-## ----source_github, message = FALSE, warning = FALSE, echo = TRUE, eval = TRUE----
-library(devtools)
+## ----load_package, message = FALSE, warning = FALSE, echo = TRUE, eval = TRUE----
+require(pvaluefunctions)
 
-# Load function
-source_url("https://raw.githubusercontent.com/DInfanger/pvalue_functions/master/confidence_distributions.R")
+## ----source_github, message = FALSE, warning = FALSE, echo = FALSE, eval = FALSE----
+#  library(devtools)
+#  
+#  # Load function
+#  source_url("https://raw.githubusercontent.com/DInfanger/pvaluefunctions/master/R/confidence_distributions.R")
+#  
 
-
-## ----ttest, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "tiff", dev.args = list(compression = "lzw"), dpi = 300----
-
-#-----------------------------------------------------------------------------
-# Sourcing function
-#-----------------------------------------------------------------------------
-
-#source("confidence_distributions.R")
-
+## ----ttest, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
 #-----------------------------------------------------------------------------
 # T-Test
 #-----------------------------------------------------------------------------
@@ -50,7 +46,7 @@ res <- conf_dist(
   , plot_p_limit = 1 - 0.999
 )
 
-## ----linreg_single_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "tiff", dev.args = list(compression = "lzw"), dpi = 300----
+## ----linreg_single_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
 #-----------------------------------------------------------------------------
 # Model
 #-----------------------------------------------------------------------------
@@ -82,7 +78,7 @@ res <- conf_dist(
   , plot_p_limit = 1 - 0.999
 )
 
-## ----linreg_single_cdf, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "tiff", dev.args = list(compression = "lzw"), dpi = 300----
+## ----linreg_single_cdf, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
 res <- conf_dist(
   estimate = c(-0.02143)
   , df = c(43)
@@ -104,7 +100,7 @@ res <- conf_dist(
 )
 
 
-## ----linreg_multiple_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "tiff", dev.args = list(compression = "lzw"), dpi = 300----
+## ----linreg_multiple_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
 res <- conf_dist(
   estimate = c(0.13115, 0.04913)
   , df = c(43, 43)
@@ -124,7 +120,7 @@ res <- conf_dist(
   , plot_p_limit = 1 - 0.999
 )
 
-## ----linreg_multiple_sval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "tiff", dev.args = list(compression = "lzw"), dpi = 300----
+## ----linreg_multiple_sval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
 res <- conf_dist(
   estimate = c(0.13115, 0.04913)
   , df = c(43, 43)
@@ -144,7 +140,7 @@ res <- conf_dist(
   , plot_p_limit = 1 - 0.999
 )
 
-## ----corr_pearson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "tiff", dev.args = list(compression = "lzw"), dpi = 300----
+## ----corr_pearson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
 #-----------------------------------------------------------------------------
 # Calculate Pearson's correlation coefficient
 #-----------------------------------------------------------------------------
@@ -173,7 +169,7 @@ res <- conf_dist(
   , plot_p_limit = 1 - 0.999
 )
 
-## ----logreg, message = FALSE, warning = FALSE, fig.width = 9.2, fig.height = 7.2, out.width = "80%", fig.align='center', dev = "tiff", dev.args = list(compression = "lzw"), dpi = 300----
+## ----logreg, message = FALSE, warning = FALSE, fig.width = 9.2, fig.height = 7.2, out.width = "80%", fig.align='center'----
 #-----------------------------------------------------------------------------
 # Calculate logistic regression model using a dataset from UCLA
 #-----------------------------------------------------------------------------
@@ -210,7 +206,7 @@ res <- conf_dist(
   , plot_p_limit = 1 - 0.999
 )
 
-## ----prop, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "tiff", dev.args = list(compression = "lzw"), dpi = 300----
+## ----prop, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
 res <- conf_dist(
   estimate = c(0.44)
   , n = c(50)
@@ -230,6 +226,24 @@ res <- conf_dist(
   , plot_p_limit = 1 - 0.999
 )
 
-## ----session_info, include=TRUE, echo=FALSE------------------------------
-sessionInfo()
+## ----propdiff, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
+res <- conf_dist(
+  estimate = c(68/100, 98/150)
+  , n = c(100, 150)
+  , type = "propdiff"
+  , plot_type = "p_val"
+  , n_values = 1e4L
+  , conf_level = c(0.95, 0.90, 0.80)
+  , null_values = c(0)
+  , trans = "identity"
+  , alternative = "two_sided"
+  , log_yaxis = TRUE
+  , cut_logyaxis = 0.05
+  , xlab = "Difference between proportions"
+  , together = FALSE
+  , plot_p_limit = 1 - 0.9999
+)
+
+## ----session_info, include=FALSE, echo=FALSE, eval = FALSE---------------
+#  sessionInfo()
 
