@@ -8,8 +8,9 @@ conf_dist(estimate = NULL, n = NULL, df = NULL, stderr = NULL,
   tstat = NULL, type = NULL, plot_type = "p_val",
   n_values = 10000L, est_names = NULL, conf_level = NULL,
   null_values = NULL, trans = "identity", alternative = "two_sided",
-  log_yaxis = TRUE, cut_logyaxis = 0.05, xlab = NULL, xlim = NULL,
-  together = FALSE, plot_p_limit = (1 - 0.999))
+  log_yaxis = FALSE, cut_logyaxis = 0.05, xlab = NULL, xlim = NULL,
+  together = FALSE, plot_p_limit = (1 - 0.999),
+  plot_counternull = FALSE)
 }
 \arguments{
 \item{estimate}{Numerical vector containing the estimate(s).}
@@ -32,9 +33,9 @@ conf_dist(estimate = NULL, n = NULL, df = NULL, stderr = NULL,
 
 \item{conf_level}{(optional) Numerical vector indicating the confidence level(s). Bust be between 0 and 1.}
 
-\item{null_values}{(optional) Numerical vector indicating the null value(s) in the plot}
+\item{null_values}{(optional) Numerical vector indicating the null value(s) in the plot on the \emph{untransformed} scale. For example: The null values for an odds ratio of 1 is 0 on the log-odds scale.}
 
-\item{trans}{(optional) String indicating the transformation function that will be applied to the estimates and confidence curves. For example: \code{exp} for an exponential transformation of the log-odds in logistic regression.}
+\item{trans}{(optional) String indicating the transformation function that will be applied to the estimates and confidence curves. For example: \code{"exp"} for an exponential transformation of the log-odds in logistic regression.}
 
 \item{alternative}{String indicating if the confidence level(s) are two-sided or one-sided. Must be one of the following: \code{two_sided}, \code{one_sided}.}
 
@@ -44,11 +45,13 @@ conf_dist(estimate = NULL, n = NULL, df = NULL, stderr = NULL,
 
 \item{xlab}{(optional) String indicating the label of the x-axis.}
 
-\item{xlim}{(optional) Optional numerical vector of length 2 indicating the limits of the x-axis on the untransformed scale.}
+\item{xlim}{(optional) Optional numerical vector of length 2 indicating the limits of the x-axis on the \emph{untransformed} scale. For example: If you want to plot \emph{p}-value functions for odds ratios from logistic regressions, the limits have to be given on the log-odds scale. Get's overriden if null values are outside of this range.}
 
 \item{together}{Logical. Indicating if graphics for multiple estimates should be displayed together or on separate plots.}
 
 \item{plot_p_limit}{Numerical value indicating the lower limit of the y-axis. Must be greater than 0 for a logarithmic scale (i.e. \code{log_yaxis = TRUE}).}
+
+\item{plot_counternull}{Logical. Indicating if the counternull should be plotted as a point. Only available for \emph{p}-value functions and s-value functions. If the counternull values are outside of the plotted functions, they are not shown.}
 }
 \value{
 \code{conf_dist} returns four data frames and a ggplot2-plot object: \code{res_frame} (contains parameter values, \emph{p}-values, s-values, confidence distribution and density, variable names and type of hypothesis), \code{conf_frame} (contains the used confidence level(s) and the corresponding lower and upper limits as well as the corresponding variable name), \code{counternull_frame} (contains the counternull for the corresponding null values), \code{point_est} (contains the mean, median and mode point estimates) and \code{plot} (a ggplot2-plot).
@@ -65,24 +68,26 @@ The function \code{conf_dist} generates confidence distributions (cdf), confiden
 # Create a p-value function for an estimate using the normal distribution
 #======================================================================================
 
-conf_dist(
-estimate = c(-0.13)
-, stderr = c(0.224494)
-, type = "general_z"
-, plot_type = "p_val"
-, n_values = 1e4L
-, est_names = c("Parameter value")
-, log_yaxis = FALSE
-, cut_logyaxis = 0.05
-, conf_level = c(0.95)
-, null_values = c(0)
-, trans = "identity"
-, alternative = "two_sided"
-, xlab = "Var"
-, xlim = c(-1, 1)
-, together = TRUE
-, plot_p_limit = 1 - 0.9999
+res <- conf_dist(
+  estimate = c(-0.13)
+  , stderr = c(0.224494)
+  , type = "general_z"
+  , plot_type = "p_val"
+  , n_values = 1e4L
+  , est_names = c("Parameter value")
+  , log_yaxis = FALSE
+  , cut_logyaxis = 0.05
+  , conf_level = c(0.95)
+  , null_values = c(0)
+  , trans = "identity"
+  , alternative = "two_sided"
+  , xlab = "Var"
+  , xlim = c(-1, 1)
+  , together = TRUE
+  , plot_p_limit = 1 - 0.9999
+  , plot_counternull = TRUE
 )
+
 #======================================================================================
 # P-value function for a single regression coefficient (Agriculture in the model below)
 #======================================================================================
@@ -91,42 +96,88 @@ mod <- lm(Infant.Mortality~Agriculture + Fertility + Examination, data = swiss)
 summary(mod)
 
 res <- conf_dist(
- estimate = c(-0.02143)
- , df = c(43)
- , stderr = (0.02394)
- , type = "linreg"
- , plot_type = "p_val"
- , n_values = 1e4L
- , conf_level = c(0.95, 0.90, 0.80)
- , null_values = c(0)
- , trans = "identity"
- , alternative = "two_sided"
- , log_yaxis = TRUE
- , cut_logyaxis = 0.05
- , xlab = "Coefficient Agriculture"
- , together = FALSE
- , plot_p_limit = 1 - 0.999
+  estimate = c(-0.02143)
+  , df = c(43)
+  , stderr = (0.02394)
+  , type = "linreg"
+  , plot_type = "p_val"
+  , n_values = 1e4L
+  , conf_level = c(0.95, 0.90, 0.80)
+  , null_values = c(0)
+  , trans = "identity"
+  , alternative = "two_sided"
+  , log_yaxis = TRUE
+  , cut_logyaxis = 0.05
+  , xlab = "Coefficient Agriculture"
+  , together = FALSE
+  , plot_p_limit = 1 - 0.999
+  , plot_counternull = FALSE
 )
 
 #======================================================================================
-# Difference between two independent proportions
+# Difference between two independent proportions: Newcombe with continuity correction
 #======================================================================================
 
 res <- conf_dist(
- estimate = c(68/100, 98/150)
- , n = c(100, 150)
- , type = "propdiff"
- , plot_type = "p_val"
- , n_values = 1e4L
- , conf_level = c(0.95, 0.90, 0.80)
- , null_values = c(0)
- , trans = "identity"
- , alternative = "two_sided"
- , log_yaxis = TRUE
- , cut_logyaxis = 0.05
- , xlab = "Difference between proportions"
- , together = FALSE
- , plot_p_limit = 1 - 0.9999
+  estimate = c(68/100, 98/150)
+  , n = c(100, 150)
+  , type = "propdiff"
+  , plot_type = "p_val"
+  , n_values = 1e4L
+  , conf_level = c(0.95, 0.90, 0.80)
+  , null_values = c(0)
+  , trans = "identity"
+  , alternative = "two_sided"
+  , log_yaxis = TRUE
+  , cut_logyaxis = 0.05
+  , xlab = "Difference between proportions"
+  , together = FALSE
+  , plot_p_limit = 1 - 0.9999
+  , plot_counternull = FALSE
+)
+
+#======================================================================================
+# Difference between two independent proportions: Agresti & Caffo
+#======================================================================================
+
+# First proportion
+x1 <- 8
+n1 <- 40
+
+# Second proportion
+x2 <- 11
+n2 <- 30
+
+# Apply the correction
+p1hat <- (x1 + 1)/(n1 + 2)
+p2hat <- (x2 + 1)/(n2 + 2)
+
+# The original estimator
+est0 <- (x1/n1) - (x2/n2)
+
+# The unmodified estimator and its standard error using the correction
+
+est <- p1hat - p2hat
+se <- sqrt(((p1hat*(1 - p1hat))/(n1 + 2)) + ((p2hat*(1 - p2hat))/(n2 + 2)))
+
+res <- conf_dist(
+  estimate = c(est)
+  , stderr = c(se)
+  , type = "general_z"
+  , plot_type = "p_val"
+  , n_values = 1e4L
+  # , est_names = c("Estimate")
+  , log_yaxis = TRUE
+  , cut_logyaxis = 0.05
+  , conf_level = c(0.95, 0.99)
+  , null_values = c(0, 0.3)
+  , trans = "identity"
+  , alternative = "two_sided"
+  , xlab = "Difference of proportions"
+  # , xlim = c(-0.75, 0.5)
+  , together = FALSE
+  , plot_p_limit = 1 - 0.9999
+  , plot_counternull = FALSE
 )
 
 }

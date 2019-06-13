@@ -6,7 +6,7 @@ knitr::opts_chunk$set(
 )
 
 ## ----load_package, message = FALSE, warning = FALSE, echo = TRUE, eval = TRUE----
-require(pvaluefunctions)
+library(pvaluefunctions)
 
 ## ----source_github, message = FALSE, warning = FALSE, echo = FALSE, eval = FALSE----
 #  library(devtools)
@@ -44,6 +44,7 @@ res <- conf_dist(
   , xlab = "Mean difference (group 1 - group 2)"
   , together = FALSE
   , plot_p_limit = 1 - 0.999
+  , plot_counternull = TRUE
 )
 
 ## ----linreg_single_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
@@ -76,6 +77,7 @@ res <- conf_dist(
   , xlab = "Coefficient Agriculture"
   , together = FALSE
   , plot_p_limit = 1 - 0.999
+  , plot_counternull = FALSE
 )
 
 ## ----linreg_single_cdf, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
@@ -97,6 +99,7 @@ res <- conf_dist(
   , xlim = c(-0.12, 0.065)
   , together = FALSE
   # , plot_p_limit = 1 - 0.999
+  , plot_counternull = FALSE
 )
 
 
@@ -118,6 +121,7 @@ res <- conf_dist(
   , xlab = "Coefficients"
   , together = TRUE
   , plot_p_limit = 1 - 0.999
+  , plot_counternull = FALSE
 )
 
 ## ----linreg_multiple_sval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
@@ -138,6 +142,7 @@ res <- conf_dist(
   , xlab = "Coefficients"
   , together = TRUE
   , plot_p_limit = 1 - 0.999
+  , plot_counternull = TRUE
 )
 
 ## ----corr_pearson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
@@ -167,6 +172,7 @@ res <- conf_dist(
   , xlab = "Pearson correlation"
   , together = TRUE
   , plot_p_limit = 1 - 0.999
+  , plot_counternull = FALSE
 )
 
 ## ----logreg, message = FALSE, warning = FALSE, fig.width = 9.2, fig.height = 7.2, out.width = "80%", fig.align='center'----
@@ -204,6 +210,7 @@ res <- conf_dist(
   , xlim = log(c(0.4, 5))
   , together = FALSE
   , plot_p_limit = 1 - 0.999
+  , plot_counternull = TRUE
 )
 
 ## ----prop, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
@@ -224,9 +231,10 @@ res <- conf_dist(
   # , xlim = log(c(0.95, 1.2))
   , together = FALSE
   , plot_p_limit = 1 - 0.999
+  , plot_counternull = FALSE
 )
 
-## ----propdiff, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
+## ----propdiff_Wilson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
 res <- conf_dist(
   estimate = c(68/100, 98/150)
   , n = c(100, 150)
@@ -242,7 +250,88 @@ res <- conf_dist(
   , xlab = "Difference between proportions"
   , together = FALSE
   , plot_p_limit = 1 - 0.9999
+  , plot_counternull = FALSE
 )
+
+## ----propdiff_agresticaffo, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
+
+# First proportion
+
+x1 <- 8
+n1 <- 40
+
+# Second proportion
+
+x2 <- 11
+n2 <- 30
+
+# Apply the correction 
+
+p1hat <- (x1 + 1)/(n1 + 2)
+p2hat <- (x2 + 1)/(n2 + 2)
+
+# The estimator (unmodified)
+
+est0 <- (x1/n1) - (x2/n2)
+
+# The modified estimator and its standard error using the correction
+
+est <- p1hat - p2hat
+se <- sqrt(((p1hat*(1 - p1hat))/(n1 + 2)) + ((p2hat*(1 - p2hat))/(n2 + 2)))
+
+res <- conf_dist(
+  estimate = c(est)
+  , stderr = c(se)
+  , type = "general_z"
+  , plot_type = "p_val"
+  , n_values = 1e4L
+  # , est_names = c("Estimate")
+  , log_yaxis = TRUE
+  , cut_logyaxis = 0.05
+  , conf_level = c(0.95, 0.99)
+  , null_values = c(0, 0.3)
+  , trans = "identity"
+  , alternative = "two_sided"
+  , xlab = "Difference of proportions"
+  # , xlim = c(-0.75, 0.5)
+  , together = FALSE
+  , plot_p_limit = 1 - 0.9999
+  , plot_counternull = FALSE
+)
+
+
+## ----variance_calcs, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', eval = TRUE, echo = TRUE, fig.show = "hide"----
+
+# Simulate some data from a normal distribution
+
+set.seed(142857)
+var_est <- var(x <- rnorm(20, 100, 15))
+
+res <- conf_dist(
+  estimate = var_est
+  , n = length(x)
+  , type = "var"
+  , plot_type = "pdf"
+  , n_values = 1e4L
+  , est_names = c("Variance")
+  , log_yaxis = TRUE
+  , cut_logyaxis = 0.05
+  , conf_level = c(0.95)
+  # , null_values = c(15^2, 18^2)
+  , trans = "identity"
+  , alternative = "two_sided"
+  , xlab = "Variance"
+  , xlim = c(100, 900)
+  , together = TRUE
+  , plot_p_limit = 1 - 0.999
+  , plot_counternull = TRUE
+)
+
+
+## ----variance_plot, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', eval = TRUE, echo = TRUE----
+# Add vertical lines at the point estimates (mode, median, mean)
+
+res$plot + ggplot2::geom_vline(xintercept = as.numeric(res$point_est[1, 1:3]), linetype = 2, size = 1)
 
 ## ----session_info, include=FALSE, echo=FALSE, eval = FALSE---------------
 #  sessionInfo()

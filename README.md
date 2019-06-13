@@ -1,6 +1,8 @@
-*P*-value functions
+pvaluefunctions
 ================
 
+  - [*P*-value functions
+    <img src="man/figures/logo2.svg" align="right" width="120" />](#p-value-functions)
   - [Overview](#overview)
   - [Installation](#installation)
   - [Dependencies](#dependencies)
@@ -21,8 +23,14 @@
       - [Odds ratio from logistic
         regression](#odds-ratio-from-logistic-regression)
       - [Proportion](#proportion)
-      - [Difference between two independent
-        proportions](#difference-between-two-independent-proportions)
+      - [Difference between two independent proportions: Wilson’s score
+        by Newcombe with continuity
+        correction](#difference-between-two-independent-proportions-wilsons-score-by-newcombe-with-continuity-correction)
+      - [Difference between two independent proportions: Agresti-Caffo
+        adjusted Wald
+        interval](#difference-between-two-independent-proportions-agresti-caffo-adjusted-wald-interval)
+      - [Confidence density of a variance estimate from a normal
+        distribution](#confidence-density-of-a-variance-estimate-from-a-normal-distribution)
   - [References](#references)
   - [Contact](#contact)
   - [Session info](#session-info)
@@ -30,41 +38,36 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+## *P*-value functions <img src="man/figures/logo2.svg" align="right" width="120" />
+
+[![CRAN\_Status\_Badge](http://www.r-pkg.org/badges/version/pvaluefunctions)](https://cran.r-project.org/package=pvaluefunctions)
+[![downloads](https://cranlogs.r-pkg.org/badges/pvaluefunctions)](https://cran.r-project.org/package=pvaluefunctions)
+[![total
+downloads](https://cranlogs.r-pkg.org/badges/grand-total/pvaluefunctions)](http://cranlogs.r-pkg.org/badges/grand-total/pvaluefunctions)
+[![Rdoc](http://www.rdocumentation.org/badges/version/pvaluefunctions)](http://www.rdocumentation.org/packages/pvaluefunctions)
+
 ## Overview
 
-This repository contains R functions to create graphics of *p*-value
+This is the repository for the R-package
+[`pvaluefunctions`](https://cran.r-project.org/package=pvaluefunctions).
+The package contains R functions to create graphics of *p*-value
 functions, confidence distributions, confidence densities, or the
 [Surprisal value
 (S-value)](http://www.umsl.edu/~fraundorfp/egsurpri.html) (Greenland
-2019). An R-script to reproduce the plots in the publication is also
-available.
+2019).
 
 ## Installation
 
-Upon release, you can download the package directly from CRAN by typing
-`install.packages("pvaluefunctions")`.
+You can install the package directly from CRAN by typing
+`install.packages("pvaluefunctions")`. After installation, load it in R
+using
+`library(pvaluefunctions)`.
 
-Download the file `confidence_distributions.R` to your computer. You can
-either `source()` the function in R or open it, select and run
-everything. After loading the function, it’s ready for use.
+<!-- Download the file `confidence_distributions.R` to your computer. You can either `source()` the function in R or open it, select and run everything. After loading the function, it's ready for use. -->
 
-To reproduce the plots from the publication, download the file
-`paper_plots.R` and run it *after* loading the main function contained
-in the file `confidence_distributions.R` (see above).
+<!-- To reproduce the plots from the publication, download the file `paper_plots.R` and run it *after* loading the main function contained in the file `confidence_distributions.R` (see above). -->
 
-Alternatively, you can source the files directly from the GitHub
-repository using the
-[`devtools`](https://CRAN.R-project.org/package=devtools) package:
-
-``` r
-library(devtools)
-
-# Load main function
-source_url("https://raw.githubusercontent.com/DInfanger/pvaluefunctions/master/R/confidence_distributions.R")
-
-# Load file to reproduce figures in the publication
-source_url("https://raw.githubusercontent.com/DInfanger/pvalue_functions/master/R/paper_plots.R")
-```
+<!-- Alternatively, you can source the main function directly from this GitHub repository using the [`devtools`](https://CRAN.R-project.org/package=devtools) package: -->
 
 ## Dependencies
 
@@ -90,6 +93,12 @@ of ggplot2 until the bug has been fixed. You can install the
 developmental version using the following command (after installing the
 [`devtools`](https://CRAN.R-project.org/package=devtools) package):
 `devtools::install_github("tidyverse/ggplot2")`
+
+To see what version of ggplot2 has been used to create the plots on this
+page, see the [Session info](#session-info).
+
+This warning will be deleted upon the release of a new version of
+ggplot2 that fixes the bug.
 
 ## Usage
 
@@ -127,11 +136,13 @@ The function has the following arguments:
   - `conf_level` (optional): Numerical vector indicating the confidence
     level(s). Bust be between 0 and 1.
   - `null_values` (optional): Numerical vector indicating the null
-    value(s) in the plot
+    value(s) in the plot on the *untransformed* scale. For example: If
+    you want to plot odds ratios from logistic regressions, the
+    `null_values` have to be given on the log-odds scale.
   - `trans` (optional): String indicating the transformation function
     that will be applied to the estimates and confidence curves. For
-    example: “exp” for an exponential transformation of the log-odds in
-    logistic regression.
+    example: `"exp"` for an exponential transformation of the log-odds
+    in logistic regression.
   - `alternative`: String indicating if the confidence level(s) are
     two-sided or one-sided. Must be one of the following: `two_sided`,
     `one_sided`.
@@ -141,13 +152,20 @@ The function has the following arguments:
     the y-axis will be displayed logarithmically. Must lie between 0 and
     1.
   - `xlab` (optional): String indicating the label of the x-axis.
-  - `xlim` (optional): Optional numerical vector of length 2 indicating
-    the limits of the x-axis on the *untransformed* scale.
+  - `xlim` (optional): Numerical vector of length 2 indicating the
+    limits of the x-axis on the *untransformed* scale. For example: If
+    you want to plot *p*-value functions for odds ratios from logistic
+    regressions, the limits have to be given on the log-odds scale. Gets
+    overriden if null values are outside of this range.
   - `together`: Logical. Indicating if graphics for multiple estimates
     should be displayed together or on separate plots.
   - `plot_p_limit`: Numerical value indicating the lower limit of the
     y-axis. Must be greater than 0 for a logarithmic scale
     (i.e. `log_yaxis = TRUE`).
+  - `plot_counternull`: Logical. Indicating if the counternull should be
+    plotted as a point. Only available for -value functions and s-value
+    functions. If the counternull values are outside of the plotted
+    functions, they are not shown.
 
 ### Required arguments for different estimate types
 
@@ -167,9 +185,9 @@ The main function `conf_dist()` returns five objects in a list:
     the plot.
   - onf\_frame\`: A data frame containing the confidence intervals for
     the specified confidence levels for all estimates.
-  - \*\*`counternull_frame`: A data frame containing the counternull
-    values for the specified null values (see Rosenthal & Rubin (1994)
-    for more information about the counternull).
+  - `counternull_frame`: A data frame containing the counternull values
+    for the specified null values (see Rosenthal & Rubin (1994) for more
+    information about the counternull).
   - `point_est`: A data frame containing the point estimates for all
     estimates. The point estimates correspond to the mean, median or
     mode of the confidence density (see Xie & Singh (2013) for more
@@ -227,15 +245,16 @@ res <- conf_dist(
   , null_values = c(0)
   , trans = "identity"
   , alternative = "two_sided"
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , xlab = "Mean difference (group 1 - group 2)"
   , together = FALSE
   , plot_p_limit = 1 - 0.999
+  , plot_counternull = TRUE
 )
 ```
 
-<img src="README_files/figure-gfm/ttest-1.png" width="80%" style="display: block; margin: auto;" />
+<img src="man/figures/README-ttest-1.png" width="80%" style="display: block; margin: auto;" />
 
 ### Single coefficient from a linear regression model
 
@@ -290,12 +309,14 @@ res <- conf_dist(
   , log_yaxis = TRUE
   , cut_logyaxis = 0.05
   , xlab = "Coefficient Agriculture"
+  , xlim = c(-0.12, 0.065)
   , together = FALSE
   , plot_p_limit = 1 - 0.999
+  , plot_counternull = FALSE
 )
 ```
 
-<img src="README_files/figure-gfm/linreg_single_pval-1.png" width="80%" style="display: block; margin: auto;" />
+<img src="man/figures/README-linreg_single_pval-1.png" width="80%" style="display: block; margin: auto;" />
 
 #### Confidence distribution
 
@@ -318,10 +339,14 @@ res <- conf_dist(
   , xlim = c(-0.12, 0.065)
   , together = FALSE
   # , plot_p_limit = 1 - 0.999
+  , plot_counternull = FALSE
 )
 ```
 
-<img src="README_files/figure-gfm/linreg_single_cdf-1.png" width="80%" style="display: block; margin: auto;" />
+<img src="man/figures/README-linreg_single_cdf-1.png" width="80%" style="display: block; margin: auto;" />
+
+The point where the confidence distribution is \(0.5\) is the median
+unbiased estimator (see Xie & Singh (2013) for a review and proofs).
 
 ### Multiple coefficients from a linear regression model
 
@@ -345,10 +370,11 @@ res <- conf_dist(
   , xlab = "Coefficients"
   , together = TRUE
   , plot_p_limit = 1 - 0.999
+  , plot_counternull = FALSE
 )
 ```
 
-<img src="README_files/figure-gfm/linreg_multiple_pval-1.png" width="80%" style="display: block; margin: auto;" />
+<img src="man/figures/README-linreg_multiple_pval-1.png" width="80%" style="display: block; margin: auto;" />
 
 #### Surprisal values
 
@@ -370,10 +396,11 @@ res <- conf_dist(
   , xlab = "Coefficients"
   , together = TRUE
   , plot_p_limit = 1 - 0.999
+  , plot_counternull = TRUE
 )
 ```
 
-<img src="README_files/figure-gfm/linreg_multiple_sval-1.png" width="80%" style="display: block; margin: auto;" />
+<img src="man/figures/README-linreg_multiple_sval-1.png" width="80%" style="display: block; margin: auto;" />
 
 ### Pearson correlation coefficient (one-sided)
 
@@ -415,10 +442,11 @@ res <- conf_dist(
   , xlab = "Pearson correlation"
   , together = TRUE
   , plot_p_limit = 1 - 0.999
+  , plot_counternull = FALSE
 )
 ```
 
-<img src="README_files/figure-gfm/corr_pearson-1.png" width="80%" style="display: block; margin: auto;" />
+<img src="man/figures/README-corr_pearson-1.png" width="80%" style="display: block; margin: auto;" />
 
 ### Odds ratio from logistic regression
 
@@ -475,19 +503,20 @@ res <- conf_dist(
   , n_values = 1e4L
   , est_names = c("GPA")
   , conf_level = c(0.95, 0.90, 0.80)
-  , null_values = c(log(1))
+  , null_values = c(log(1)) # null value on the log-odds scale
   , trans = "exp"
   , alternative = "two_sided"
   , log_yaxis = TRUE
   , cut_logyaxis = 0.05
   , xlab = "Odds Ratio (GPA)"
-  , xlim = log(c(0.4, 5))
+  , xlim = log(c(0.7, 5.2)) # axis limits on the log-odds scale
   , together = FALSE
   , plot_p_limit = 1 - 0.999
+  , plot_counternull = TRUE
 )
 ```
 
-<img src="README_files/figure-gfm/logreg-1.png" width="80%" style="display: block; margin: auto;" />
+<img src="man/figures/README-logreg-1.png" width="80%" style="display: block; margin: auto;" />
 
 ### Proportion
 
@@ -509,12 +538,13 @@ res <- conf_dist(
   # , xlim = log(c(0.95, 1.2))
   , together = FALSE
   , plot_p_limit = 1 - 0.999
+  , plot_counternull = FALSE
 )
 ```
 
-<img src="README_files/figure-gfm/prop-1.png" width="80%" style="display: block; margin: auto;" />
+<img src="man/figures/README-prop-1.png" width="80%" style="display: block; margin: auto;" />
 
-### Difference between two independent proportions
+### Difference between two independent proportions: Wilson’s score by Newcombe with continuity correction
 
 ``` r
 res <- conf_dist(
@@ -532,10 +562,114 @@ res <- conf_dist(
   , xlab = "Difference between proportions"
   , together = FALSE
   , plot_p_limit = 1 - 0.9999
+  , plot_counternull = FALSE
 )
 ```
 
-<img src="README_files/figure-gfm/propdiff-1.png" width="80%" style="display: block; margin: auto;" />
+<img src="man/figures/README-propdiff_Wilson-1.png" width="80%" style="display: block; margin: auto;" />
+
+### Difference between two independent proportions: Agresti-Caffo adjusted Wald interval
+
+The standard Wald interval can be modified in a simple manner to
+drastically improve its coverage probabilities. Simply add 1 to the
+number of successes and add 2 to the sample size for both proportions.
+Then proceed to calculate the Wald interval with these modified data.
+The point estimate for the difference between proportions is still
+calculated using the unmodified data. The function `conf_dist` does not
+have a dedicaded type for this kind of estimator but as the Wald
+interval is based on the normal distribution, we can use `type =
+general_z` to create the *p*-value function.
+
+``` r
+
+# First proportion
+
+x1 <- 8
+n1 <- 40
+
+# Second proportion
+
+x2 <- 11
+n2 <- 30
+
+# Apply the correction 
+
+p1hat <- (x1 + 1)/(n1 + 2)
+p2hat <- (x2 + 1)/(n2 + 2)
+
+# The estimator (unmodified)
+
+est0 <- (x1/n1) - (x2/n2)
+
+# The modified estimator and its standard error using the correction
+
+est <- p1hat - p2hat
+se <- sqrt(((p1hat*(1 - p1hat))/(n1 + 2)) + ((p2hat*(1 - p2hat))/(n2 + 2)))
+
+res <- conf_dist(
+  estimate = c(est)
+  , stderr = c(se)
+  , type = "general_z"
+  , plot_type = "p_val"
+  , n_values = 1e4L
+  # , est_names = c("Estimate")
+  , log_yaxis = TRUE
+  , cut_logyaxis = 0.05
+  , conf_level = c(0.95, 0.99)
+  , null_values = c(0, 0.3)
+  , trans = "identity"
+  , alternative = "two_sided"
+  , xlab = "Difference of proportions"
+  # , xlim = c(-0.75, 0.5)
+  , together = FALSE
+  , plot_p_limit = 1 - 0.9999
+  , plot_counternull = FALSE
+)
+```
+
+<img src="man/figures/README-propdiff_agresticaffo-1.png" width="80%" style="display: block; margin: auto;" />
+
+### Confidence density of a variance estimate from a normal distribution
+
+The confidence density of a variance estimate is skewed. This means that
+the mean, mode and median of the confidence density will not be
+identical, in general.
+
+``` r
+
+# Simulate some data from a normal distribution
+
+set.seed(142857)
+var_est <- var(x <- rnorm(20, 100, 15))
+
+res <- conf_dist(
+  estimate = var_est
+  , n = length(x)
+  , type = "var"
+  , plot_type = "pdf"
+  , n_values = 1e4L
+  , est_names = c("Variance")
+  , log_yaxis = TRUE
+  , cut_logyaxis = 0.05
+  , conf_level = c(0.95)
+  # , null_values = c(15^2, 18^2)
+  , trans = "identity"
+  , alternative = "two_sided"
+  , xlab = "Variance"
+  , xlim = c(100, 900)
+  , together = TRUE
+  , plot_p_limit = 1 - 0.999
+  , plot_counternull = TRUE
+)
+```
+
+``` r
+# Add vertical lines at the point estimates (mode, median, mean)
+
+res$plot + ggplot2::geom_vline(xintercept = as.numeric(res$point_est[1, 1:3]), linetype = 2, size = 1)
+```
+
+<img src="man/figures/README-variance_plot-1.png" width="80%" style="display: block; margin: auto;" />
 
 ## References
 
@@ -591,31 +725,29 @@ distribution estimator of a parameter: A review. *Internat Statist Rev.*
     #> [1] stats     graphics  grDevices utils     datasets  methods   base     
     #> 
     #> other attached packages:
-    #> [1] pvaluefunctions_1.1.0
+    #> [1] pvaluefunctions_1.2.0
     #> 
     #> loaded via a namespace (and not attached):
-    #>  [1] Rcpp_1.0.1         RColorBrewer_1.1-2 pillar_1.4.0      
+    #>  [1] Rcpp_1.0.1         RColorBrewer_1.1-2 pillar_1.4.1      
     #>  [4] compiler_3.6.0     prettyunits_1.0.2  remotes_2.0.4     
     #>  [7] tools_3.6.0        testthat_2.1.1     digest_0.6.19     
-    #> [10] pkgbuild_1.0.3     pkgload_1.0.2      tibble_2.1.1      
-    #> [13] gtable_0.3.0       evaluate_0.13      memoise_1.1.0     
+    #> [10] pkgbuild_1.0.3     pkgload_1.0.2      tibble_2.1.2      
+    #> [13] gtable_0.3.0       evaluate_0.14      memoise_1.1.0     
     #> [16] pkgconfig_2.0.2    rlang_0.3.4        cli_1.1.0         
     #> [19] curl_3.3           yaml_2.2.0         xfun_0.7          
     #> [22] dplyr_0.8.1        withr_2.1.2        stringr_1.4.0     
     #> [25] knitr_1.23         desc_1.2.0         fs_1.3.1          
     #> [28] devtools_2.0.2     tidyselect_0.2.5   rprojroot_1.3-2   
     #> [31] grid_3.6.0         glue_1.3.1         R6_2.4.0          
-    #> [34] processx_3.3.1     rmarkdown_1.12     sessioninfo_1.1.1 
-    #> [37] purrr_0.3.2        callr_3.2.0        ggplot2_3.1.1.9000
-    #> [40] magrittr_1.5       scales_1.0.0       backports_1.1.4   
-    #> [43] ps_1.3.0           htmltools_0.3.6    usethis_1.5.0     
-    #> [46] assertthat_0.2.1   colorspace_1.4-1   labeling_0.3      
-    #> [49] stringi_1.4.3      lazyeval_0.2.2     munsell_0.5.0     
-    #> [52] crayon_1.3.4
+    #> [34] processx_3.3.1     rmarkdown_1.13     sessioninfo_1.1.1 
+    #> [37] zipfR_0.6-10       purrr_0.3.2        callr_3.2.0       
+    #> [40] ggplot2_3.1.1.9000 magrittr_1.5       scales_1.0.0      
+    #> [43] backports_1.1.4    ps_1.3.0           htmltools_0.3.6   
+    #> [46] usethis_1.5.0      assertthat_0.2.1   colorspace_1.4-1  
+    #> [49] labeling_0.3       stringi_1.4.3      lazyeval_0.2.2    
+    #> [52] munsell_0.5.0      crayon_1.3.4
 
 ## License
 
 [![License: GPL
 v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-
-[GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0).
