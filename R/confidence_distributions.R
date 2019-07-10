@@ -10,7 +10,7 @@ if (getRversion() >= "2.15.1") {
 
 #' Create and Plot \emph{P}-Value Functions, S-Value Functions, Confidence Distributions and Confidence Densities
 #'
-#' The function \code{conf_dist} generates confidence distributions (cdf), confidence densities (pdf), shannon suprisal (s-value) functions and \emph{p}-value functions for several commonly used estimates. In addition, counternulls (see Rosenthal et al. 1994) and point estimates are calculated.
+#' The function \code{conf_dist} generates confidence distributions (cdf), confidence densities (pdf), Shannon suprisal (s-value) functions and \emph{p}-value functions for several commonly used estimates. In addition, counternulls (see Rosenthal et al. 1994) and point estimates are calculated.
 #'
 #' \emph{P}-value functions and confidence intervals are calculated based on the \emph{t}-distribution for \emph{t}-tests, linear regression coefficients, and gamma regression models (GLM). The normal distribution is used for logistic regression, poisson regression and cox regression models. For correlation coefficients, Fisher's transform is used using the corresponding variances (see Bonett et al. 2000). \emph{P}-value functions and confidence intervals for variances are constructed using the Chi2 distribution. Finally, Wilson's score intervals are used for one proportion. For differences of proportions, the Wilson score interval with continuity correction is used (Newcombe 1998).
 #'
@@ -18,7 +18,7 @@ if (getRversion() >= "2.15.1") {
 #' @param n Numerical vector containing the sample size(s). Required for correlations, variances, proportions and differences between proportions. Must be equal the number of estimates.
 #' @param df Numerical vector containing the degrees of freedom. Required for statistics based on the \emph{t}-distribution (e.g. linear regression) and \emph{t}-tests. Must be equal the number of estimates.
 #' @param stderr Numerical vector containing the standard error(s) of the estimate(s). Required for statistics based on the \emph{t}-distribution (e.g. linear regression) and the normal distribution (e.g. logistic regression). Must be equal the number of estimate(s).
-#' @param tstat Numerical vector containing the \emph{t}-statistic(s). Required for \emph{t}-tests (means and mean differences). Must be equal the number of estimates.
+#' @param tstat Numerical vector contaiqning the \emph{t}-statistic(s). Required for \emph{t}-tests (means and mean differences). Must be equal the number of estimates.
 #' @param type String indicating the type of the estimate. Must be one of the following: \code{ttest}, \code{linreg}, \code{gammareg}, \code{general_t}, \code{logreg}, \code{poisreg}, \code{coxreg}, \code{general_z}, \code{pearson}, \code{spearman}, \code{kendall}, \code{var}, \code{prop}, \code{propdiff}.
 #' @param plot_type String indicating the type of plot. Must be one of the following: \code{cdf} (confidence distribution), \code{pdf} (confidence density), \code{p_val} (\emph{p}-value function), \code{s_val} (Surprisal value functions). For differences between independent proportions, only \emph{p}-value functions and Surprisal values are available.
 #' @param n_values (optional) Integer indicating the number of points that are used to generate the graphics. The higher this number, the higher the computation time and resolution.
@@ -29,32 +29,40 @@ if (getRversion() >= "2.15.1") {
 #' @param alternative String indicating if the confidence level(s) are two-sided or one-sided. Must be one of the following: \code{two_sided}, \code{one_sided}.
 #' @param log_yaxis Logical. Indicating if a portion of the y-axis should be displayed on the logarithmic scale.
 #' @param cut_logyaxis Numerical value indicating the threshold below which the y-axis will be displayed logarithmically. Must lie between 0 and 1.
-#' @param xlab (optional) String indicating the label of the x-axis.
 #' @param xlim (optional) Optional numerical vector of length 2 indicating the limits of the x-axis on the \emph{untransformed} scale. For example: If you want to plot \emph{p}-value functions for odds ratios from logistic regressions, the limits have to be given on the log-odds scale. Get's overriden if null values are outside of this range.
 #' @param together Logical. Indicating if graphics for multiple estimates should be displayed together or on separate plots.
+#' @param nrow (optional) Integer greater than 0 indicating the number of rows when \code{together = FALSE} is specified for multiple estimates. Used in \code{facet_wrap} in ggplot2.
+#' @param ncol (optional) Integer greater than 0 indicating the number of columns when \code{together = FALSE} is specified for multiple estimates. Used in \code{facet_wrap} in ggplot2.
 #' @param plot_p_limit Numerical value indicating the lower limit of the y-axis. Must be greater than 0 for a logarithmic scale (i.e. \code{log_yaxis = TRUE}).
-#' @param plot_counternull Logical. Indicating if the counternull should be plotted as a point. Only available for \emph{p}-value functions and s-value functions. If the counternull values are outside of the plotted functions, they are not shown.
+#' @param plot_counternull Logical. Indicating if the counternull should be plotted as a point. Only available for \emph{p}-value functions and s-value functions. Counternull values that are outside of the plotted functions are not shown.
+#' @param title (optional) String containing a title of the plot.
+#' @param xlab (optional) String indicating the label of the x-axis.
+#' @param ylab (optional) String indicating the title for the primary (left) y-axis.
+#' @param ylab_sec (optional) String indicating the title for the secondary (right) y-axis.
 #'
 #' @return \code{conf_dist} returns four data frames and a ggplot2-plot object: \code{res_frame} (contains parameter values, \emph{p}-values, s-values, confidence distribution and density, variable names and type of hypothesis), \code{conf_frame} (contains the used confidence level(s) and the corresponding lower and upper limits as well as the corresponding variable name), \code{counternull_frame} (contains the counternull for the corresponding null values), \code{point_est} (contains the mean, median and mode point estimates) and \code{plot} (a ggplot2-plot).
-#' @references Bender R, Berg G, Zeeb H. Tutorial: using confidence curves in medical research. Biom J. 2005;47(2):237-247.
+#' @references Bender R, Berg G, Zeeb H. Tutorial: using confidence curves in medical research. \emph{Biom J.} 2005;47(2):237-247.
 #'
-#' Bonett DG, Wright TA. Sample size requirements for estimating Pearson, Kendall and Spearman correlations. 2000;65(1):23-28.
+#' Bonett DG, Wright TA. Sample size requirements for estimating Pearson, Kendall and Spearman correlations. \emph{Psychometrika.} 2000;65(1):23-28.
 #'
-#' Newcombe RG. Interval estimation for the difference between independent proportions: comparison of eleven methods. Statist. Med. 1998;17:873-890.
+#' Infanger D, Schmidt-Trucksäss A. \emph{P} value functions: An underused method to present research results and to promote quantitative reasoning. \emph{Stat Med.} 2019;1-9.
 #'
-#' Poole C. Confidence intervals exclude nothing. Am J Public Health. 1987;77(4):492-493.
+#' Newcombe RG. Interval estimation for the difference between independent proportions: comparison of eleven methods. \emph{Stat Med.} 1998;17:873-890.
 #'
-#' Poole C. Beyond the confidence interval. Am J Public Health. 1987;77(2):195-199.
+#' Poole C. Confidence intervals exclude nothing. \emph{Am J Public Health.} 1987;77(4):492-493.
 #'
-#' Rosenthal R, Rubin D. The counternull value of an effect size: a new statistic. 1994;5(6):329-334.
+#' Poole C. Beyond the confidence interval. \emph{Am J Public Health.} 1987;77(2):195-199.
+#'
+#' Rosenthal R, Rubin D. The counternull value of an effect size: a new statistic. \emph{Psychological Science.} 1994;5(6):329-334.
 #'
 #' Rothman KJ, Greenland S, Lash TL. Modern epidemiology. 3rd ed. Philadelphia, PA: Wolters Kluwer; 2008.
 #'
 #' Schweder T, Hjort NL. Confidence, likelihood, probability: statistical inference with confidence distributions. New York, NY: Cambridge University Press; 2016.
 #'
-#' Sullivan KM, Foster DA. Use of the confidence interval function. Epidemiology. 1990;1(1):39-42.
+#' Sullivan KM, Foster DA. Use of the confidence interval function. \emph{Epidemiology.} 1990;1(1):39-42.
 #'
-#' Xie Mg, Singh K. Confidence distribution, the frequentist distribution estimator of a parameter: A review. Internat Statist Rev. 2013;81(1):3-39.
+#' Xie Mg, Singh K. Confidence distribution, the frequentist distribution estimator of a parameter: A review. \emph{Internat Statist Rev.} 2013;81(1):3-39.
+#'
 #' @examples
 #'
 #' #======================================================================================
@@ -121,7 +129,7 @@ if (getRversion() >= "2.15.1") {
 #'   , null_values = c(0)
 #'   , trans = "identity"
 #'   , alternative = "two_sided"
-#'   , log_yaxis = TRUE
+#'   , log_yaxis = FALSE
 #'   , cut_logyaxis = 0.05
 #'   , xlab = "Difference between proportions"
 #'   , together = FALSE
@@ -160,7 +168,7 @@ if (getRversion() >= "2.15.1") {
 #'   , plot_type = "p_val"
 #'   , n_values = 1e4L
 #'   # , est_names = c("Estimate")
-#'   , log_yaxis = TRUE
+#'   , log_yaxis = FALSE
 #'   , cut_logyaxis = 0.05
 #'   , conf_level = c(0.95, 0.99)
 #'   , null_values = c(0, 0.3)
@@ -171,6 +179,7 @@ if (getRversion() >= "2.15.1") {
 #'   , together = FALSE
 #'   , plot_p_limit = 1 - 0.9999
 #'   , plot_counternull = FALSE
+#'   , title = "P-value function for the difference of two independent proportions"
 #' )
 #'
 #' @seealso \code{\link[concurve]{plotpint}}
@@ -198,8 +207,13 @@ conf_dist <- function(
   , xlab = NULL
   , xlim = NULL
   , together = FALSE
+  , nrow = NULL
+  , ncol = NULL
   , plot_p_limit = (1 - 0.999)
   , plot_counternull = FALSE
+  , title = NULL
+  , ylab = NULL
+  , ylab_sec = NULL
 ) {
 
   #-----------------------------------------------------------------------------
@@ -228,31 +242,25 @@ conf_dist <- function(
 
   if (is.null(estimate)) {stop("Please provide an estimate.")}
 
-  if (length(type) == 0) {stop("Please provide the type of the estimate(s).")}
+  # if (length(type) == 0L) {stop("Please provide the type of the estimate(s).")}
 
   if (!alternative %in% c("one_sided", "two_sided")) {stop("Alternative must be either \"two_sided\" or \"one_sided\".")}
 
-  if (plot_p_limit == 0 & log_yaxis == TRUE) {stop("Cannot plot 0 on logarithmic axis.")}
+  if (plot_p_limit == 0 && isTRUE(log_yaxis)) {stop("Cannot plot 0 on logarithmic axis.")}
 
-  if (plot_p_limit > 0.5 & alternative %in% "one_sided") {stop("Plot limit must be below 0.5 for one-sided hypotheses.")}
+  if (plot_p_limit >= 0.5 && alternative %in% "one_sided") {stop("Plot limit must be below 0.5 for one-sided hypotheses.")}
 
-  if (alternative %in% "two_sided" & any((1 - conf_level) >= 1)) {
+  if (any((1 - conf_level) >= 1) && alternative %in% "two_sided") {
     conf_level <- conf_level[-which((1 - conf_level) >= 1)]
   }
 
-  if (alternative %in% "one_sided" & any((2 - 2*conf_level) >= 1)) {
+  if (any((2 - 2*conf_level) >= 1) && alternative %in% "one_sided") {
     conf_level <- conf_level[-which((2 - 2*conf_level) >= 1)]
   }
 
   if (type %in% c("pearson", "spearman", "kendall", "var", "prop", "propdiff") && !trans %in% "identity") {
     trans <- "identity"
     cat("\nTransformation changed to identity.\n")
-  }
-
-  if (!is.null(xlab)){
-    # xlab <- as.character(xlab)
-  } else {
-    xlab <- "Estimate"
   }
 
   if (!plot_type %in% c("p_val", "cdf", "pdf", "s_val")) {
@@ -267,43 +275,47 @@ conf_dist <- function(
     stop("Please provide proportion estimates as decimals between 0 and 1.")
   }
 
-  if (type %in% "propdiff" && ((length(estimate) != 2) || (length(n) != 2))) {
-    stop("Please provide exactly two estimates and to sample sizes (n) for a difference in proportions.")
+  if (type %in% "propdiff" && ((length(estimate) != 2L) || (length(n) != 2L))) {
+    stop("Please provide exactly two estimates and two sample sizes (n) for a difference in proportions.")
   }
 
   if (type %in% "propdiff" && !plot_type %in% c("p_val", "s_val")) {
     stop("Currently, only P-value functions (p_val) and S-value functions (s_val) are allowed for difference in proportions.")
   }
 
-  if (type %in% "propdiff" &&( ((estimate[1]*n[1])%%1 >= 0.05) || ((estimate[2]*n[2])%%1 >= 0.05))) {
+  if (type %in% "propdiff" && (((estimate[1]*n[1])%%1 >= 0.05) || ((estimate[2]*n[2])%%1 >= 0.05))) {
     warning("Number of successes (i.e. estimate*n) of proportions not integer! The the number of successes was rounded (i.e. round(estimate*n)).")
   }
 
-  if (!is.null(conf_level) & any(conf_level <= 0) || any(conf_level >= 1)) {
-    stop("Confidence levels must lie between 0 and 1.")
+  if (!is.null(conf_level) && (any(conf_level <= 0) || any(conf_level >= 1))) {
+    stop("All confidence levels must lie between 0 and 1.")
+  }
+
+  if (type %in% c("pearson", "spearman", "kendall") && !is.null(estimate) && any(abs(estimate) > 1)) {
+    stop("Correlation coefficients must lie between -1 and 1.")
   }
 
   if (type %in% c("pearson", "spearman", "kendall") && !is.null(null_values) && any(abs(null_values) > 1)) {
-    stop("Null values for correlations  must lie between -1 and 1.")
+    stop("Null values for correlations must lie between -1 and 1.")
   }
 
-  if (type %in% c("prop") && !is.null(null_values) & (any(null_values <= 0) || any(null_values >= 1))) {
-    stop("Null values for proportions  must lie between 0 and 1 (excluding).")
+  if (type %in% c("prop") && !is.null(null_values) && (any(null_values <= 0) || any(null_values >= 1))) {
+    stop("Null values for proportions must lie between 0 and 1 (excluding).")
   }
 
   if (!is.null(xlab) & (length(xlab) != 1L)) {
     stop("Length of x-axis label must be 1.")
   }
 
-  if (!type %in% "propdiff" && !is.null(est_names) & (length(est_names) != length(estimate))) {
+  if (!type %in% "propdiff" && !is.null(est_names) && (length(est_names) != length(estimate))) {
     stop("Length of estimates does not match length of estimate names.")
   }
 
-  if (type %in% "propdiff" && !is.null(est_names) & (length(est_names) > 1)) {
-    stop("Only one estimate name for a proportion difference.")
+  if (type %in% "propdiff" && !is.null(est_names) && (length(est_names) > 1L)) {
+    stop("Provide only one estimate name for a proportion difference.")
   }
 
-  if (!is.null(xlim) & (length(xlim) != 2L)) {
+  if (!is.null(xlim) && (length(xlim) != 2L)) {
     stop("Please provide two limits for the x-axis.")
   }
 
@@ -311,7 +323,7 @@ conf_dist <- function(
     xlim <- sort(xlim, decreasing = FALSE)
   }
 
-  if (is.null(type) || (!type %in% c("ttest", "linreg", "gammareg", "general_t", "logreg", "poisreg", "coxreg", "general_z", "pearson", "spearman", "kendall", "var", "prop", "propdiff"))) {
+  if ((length(type) == 0L) || (!type %in% c("ttest", "linreg", "gammareg", "general_t", "logreg", "poisreg", "coxreg", "general_z", "pearson", "spearman", "kendall", "var", "prop", "propdiff"))) {
     stop("\"type\" must be one of: ttest, linreg, gammareg, general_t, logreg, poisreg, coxreg, general_z, pearson, spearman, kendall, var, prop and propdiff.")
   }
 
@@ -323,52 +335,56 @@ conf_dist <- function(
     }
   }
 
-  if (type %in% "ttest" & (is.null(tstat) || is.null(df))){
+  if (type %in% "ttest" && (is.null(tstat) || is.null(df))){
     stop("Please provide the t-statistic and the degrees of freedom of the t-test.")
   }
 
-  if (type %in% c("linreg", "gammareg", "general_t") & (is.null(df) || is.null(stderr))){
+  if (type %in% c("linreg", "gammareg", "general_t") && (is.null(df) || is.null(stderr))){
     stop("Please provide the (residual) degrees of freedom and the standard error of the estimates.")
   }
 
-  if (type %in% c("logreg", "poisreg", "coxreg", "general_z") & (is.null(stderr))){
+  if (type %in% c("logreg", "poisreg", "coxreg", "general_z") && is.null(stderr)){
     stop("Please provide the standard error of the estimates.")
   }
 
-  if (type %in% c("pearson", "spearman", "kendall", "prop") & (is.null(n))){
+  if (type %in% c("pearson", "spearman", "kendall", "prop") && is.null(n)){
     stop("Please provide the sample size for correlations and proportions.")
   }
 
-  if ((type %in% c("pearson", "spearman") & any(n <= 3)) | (type %in% c("kendall") & any(n <= 4))){
+  if ((type %in% c("pearson", "spearman") && any(n < 4)) || (type %in% c("kendall") && any(n < 5))){
     stop("Sample size must be at least 4 for Pearson and Spearman and at least 5 for Kendall's correlation.")
   }
 
-  if (type %in% c("var") & is.null(n)){
-    stop("Sample size must be given for variance.")
+  if (type %in% c("var") && is.null(n)){
+    stop("Sample size must be given for variance estimates.")
   }
 
-  if (type %in% "ttest" & all(!is.null(df), !is.null(estimate), !is.null(tstat)) & !identical(length(df), length(estimate), length(tstat))) {
+  if (type %in% "ttest" && all(!is.null(df), !is.null(estimate), !is.null(tstat)) && !identical(length(df), length(estimate), length(tstat))) {
     stop("Degrees of freedom (df) and t-statistics (tstat) must be the same length as estimates.")
   }
 
-  if (type %in% c("linreg", "gammareg", "general_t") & all(!is.null(stderr), !is.null(df), !is.null(estimate)) & !identical(length(stderr), length(df), length(estimate))) {
+  if (type %in% c("linreg", "gammareg", "general_t") && all(!is.null(stderr), !is.null(df), !is.null(estimate)) && !identical(length(stderr), length(df), length(estimate))) {
     stop("Standard errors (stderr) and degrees of freedom (df) must be the same length as estimates.")
   }
 
-  if (type %in% c("coxreg", "logreg", "poisreg", "general_z") & all(!is.null(stderr), !is.null(estimate)) & !identical(length(stderr), length(estimate))) {
+  if (type %in% c("coxreg", "logreg", "poisreg", "general_z") && all(!is.null(stderr), !is.null(estimate)) && !identical(length(stderr), length(estimate))) {
     stop("Standard errors (stderr) must be the same length as estimates.")
   }
 
-  if (type %in% c("pearson", "spearman", "kendall", "var", "prop") & all(!is.null(n), !is.null(estimate)) & !identical(length(n), length(estimate))) {
+  if (type %in% c("pearson", "spearman", "kendall", "var", "prop") && all(!is.null(n), !is.null(estimate)) && !identical(length(n), length(estimate))) {
     stop("Sample sizes (n) must be the same length as estimates.")
   }
 
-  if (type %in% c("spearman") & (any(estimate >= 0.9) | any(n < 10))) {
+  if (type %in% c("spearman") && (any(estimate >= 0.9) || any(n < 10))) {
     warning("Approximations for Spearman's correlation are only valid for r < 0.9 and n >= 10. Interpret with caution.")
   }
 
-  if (type %in% c("kendall") & any(estimate >= 0.8)) {
+  if (type %in% c("kendall") && any(estimate >= 0.8)) {
     warning("Approximations for Kendall's correlation are only valid for r < 0.8. Interpret with caution.")
+  }
+
+  if (!type %in% "propdiff" && isFALSE(together) && (length(estimate) > 1L) && !is.null(nrow) && !is.null(ncol) && (nrow*ncol < length(estimate))) {
+    stop("nrow * ncol must be greater than or equal the number of estimates to be plotted if together = FALSE.")
   }
 
   #-----------------------------------------------------------------------------
@@ -578,7 +594,7 @@ conf_dist <- function(
   #-----------------------------------------------------------------------------
 
   if (!is.null(conf_level)) {
-    if ((together == TRUE & (length(estimate) >= 2)) | plot_type %in% "cdf") {
+    if ((isTRUE(together) & (length(estimate) >= 2)) | plot_type %in% "cdf") {
 
       min_theor_values <- min(tapply(res$res_frame$values, res$res_frame$variable, min, na.rm = TRUE), na.rm = TRUE)
       max_theor_values <- max(tapply(res$res_frame$values, res$res_frame$variable, max, na.rm = TRUE), na.rm = TRUE)
@@ -607,7 +623,7 @@ conf_dist <- function(
       #   text_frame$theor_values <- ifelse(alternative %in% "two_sided", min(xlim), max(xlim))
       # }
 
-    } else if (together == FALSE | (together == TRUE & (length(estimate) < 2))) {
+    } else if (isFALSE(together) | (isTRUE(together) & (length(estimate) < 2))) {
 
       min_theor_values <- tapply(res$res_frame$values, res$res_frame$variable, min, na.rm = TRUE)
       max_theor_values <- tapply(res$res_frame$values, res$res_frame$variable, max, na.rm = TRUE)
@@ -693,7 +709,7 @@ conf_dist <- function(
   # Add counternull values to the result frame for plotting
   #-----------------------------------------------------------------------------
 
-  if (!is.null(null_values) && plot_counternull == TRUE && plot_type %in% c("p_val", "s_val")) {
+  if (!is.null(null_values) && isTRUE(plot_counternull) && plot_type %in% c("p_val", "s_val")) {
 
     res$res_frame$counternull <- NA
 
@@ -766,15 +782,32 @@ conf_dist <- function(
     , s_val = "s_val"
   )
 
-  # Set label of the y-axis depending on the type of the plot
+  # Set label of the x-axis if not provided
 
-  y_lab <- switch(
-    plot_type
-    , p_val = expression(paste(italic("P"), "-value (two-sided) / Significance level"~alpha, sep = ""))
-    , cdf = "Confidence distribution"
-    , pdf = "Confidence density"
-    , s_val = expression(paste("Surprisal in bits (two-sided ",~italic("P"), "-value)", sep = ""))
-  )
+  if (is.null(xlab)) {
+    xlab <- "Estimate"
+  }
+
+  # Set label of the primary and secondary y-axis depending on the type of the plot
+
+  if (is.null(ylab)) {
+    ylab <- switch(
+      plot_type
+      , p_val = expression(paste(italic("P"), "-value (two-sided) / Significance level"~alpha, sep = ""))
+      , cdf = "Confidence distribution"
+      , pdf = "Confidence density"
+      , s_val = expression(paste("Surprisal in bits (two-sided ",~italic("P"), "-value)", sep = ""))
+    )
+  }
+
+  if (is.null(ylab_sec)) {
+
+    ylab_sec <- switch(
+      plot_type
+      , p_val = expression(paste(italic("P"), "-value (one-sided) / Significance level"~alpha, sep = ""))
+      , s_val = expression(paste("Surprisal in bits (one-sided ",~italic("P"), "-value)", sep = ""))
+    )
+  }
 
   # Create a ggplot2-object with no geoms
 
@@ -782,13 +815,13 @@ conf_dist <- function(
 
   # If 2 or more estimates are plotted together, differentiate them by color
 
-  if ((length(estimate) >= 2) & together == TRUE) {
+  if ((length(estimate) >= 2) & isTRUE(together)) {
     p <- p + aes(colour = variable)
   }
 
   # For only one one-sided p-value curve, set the colors to black and blue
 
-  if (alternative %in% "one_sided" & (together == FALSE | (together == TRUE & length(estimate) < 2))) {
+  if (alternative %in% "one_sided" & (isFALSE(together) | (isTRUE(together) & length(estimate) < 2))) {
     p <- p + geom_line(aes(colour = hypothesis), size = 1.5) +
       scale_colour_manual(values = c("black", "#08A9CF"))  +
       theme(
@@ -797,12 +830,12 @@ conf_dist <- function(
 
     # For only one two-sided p-value curve, set the color to black
 
-  } else if (alternative %in% "two_sided" & (together == FALSE | (together == TRUE & length(estimate) < 2))) {
+  } else if (alternative %in% "two_sided" & (isFALSE(together) | (isTRUE(together) & length(estimate) < 2))) {
     p <- p + geom_line(size = 1.5, colour = "black")
 
     # For 2 or more estimates plotted together: set the colors according to "Set1" palette
 
-  } else if (together == TRUE & (length(estimate) >= 2)) {
+  } else if (isTRUE(together) & (length(estimate) >= 2)) {
     p <- p + geom_line(size = 1.5) +
       scale_colour_brewer(palette = "Set1", name = "") +
       theme(
@@ -815,7 +848,7 @@ conf_dist <- function(
   # Add the labels for the axes
 
   p <- p + xlab(xlab) +
-    ylab(y_lab)
+    ylab(ylab)
 
   #-----------------------------------------------------------------------------
   # y-axis
@@ -824,7 +857,7 @@ conf_dist <- function(
   # For p-value curves: Set the left and right y-axes, possibly with a logarithmic part
 
   if (plot_type %in% "p_val") {
-    if (log_yaxis == TRUE & (p_cutoff < cut_logyaxis)) {
+    if (isTRUE(log_yaxis) & (p_cutoff < cut_logyaxis)) {
 
       lower_ylim_two <- round(10^(ceiling(round(log10(ifelse(alternative %in% "two_sided", plot_p_limit, plot_p_limit*2)), 5))), 10)
       lower_ylim_one <- round(10^(ceiling(round(log10(ifelse(alternative %in% "two_sided", plot_p_limit/2, plot_p_limit)), 5))), 10)
@@ -853,7 +886,7 @@ conf_dist <- function(
           , trans = magnify_trans_log(interval_low = cut_logyaxis, interval_high = 1, reducer = cut_logyaxis, reducer2 = 8)
           , sec.axis = sec_axis(
             trans = ~.*(1/2)
-            , name = expression(paste(italic("P"), "-value (one-sided) / Significance level"~alpha, sep = ""))
+            , name = ylab_sec
             , breaks = breaks_one
             , labels = lab_onesided
           )
@@ -867,7 +900,7 @@ conf_dist <- function(
           breaks = seq(0, 1, 0.1)
           , sec.axis = sec_axis(
             ~.*(1/2)
-            , name = expression(paste(italic("P"), "-value (one-sided) / Significance level"~alpha, sep = ""))
+            , name = ylab_sec
             , breaks = seq(0, 1, 0.1)/2
           )
         )
@@ -883,7 +916,7 @@ conf_dist <- function(
       , breaks = scales::pretty_breaks(n = 10)(c(0, max(res$res_frame$s_val, na.rm = TRUE)))
       , sec.axis = sec_axis(
         trans = ~. + log2(2)
-        , name = expression(paste("Surprisal in bits (one-sided ",~italic("P"), "-value)", sep = ""))
+        , name = ylab_sec
         , breaks = scales::pretty_breaks(n = 10)(c(1, -log2(min(res$res_frame$p_two, na.rm = TRUE)/2)))
       )
     )
@@ -900,7 +933,7 @@ conf_dist <- function(
     p <- p + scale_x_continuous(trans = "log", breaks = scales::pretty_breaks(n = 10))
 
     # If y-axis is plotted on a log-scale, re-add the gray rectangle
-    if (log_yaxis == TRUE) {
+    if (isTRUE(log_yaxis)) {
       p <- p + annotate("rect", xmin=0, xmax=100, ymin=ifelse(alternative %in% "two_sided", plot_p_limit, plot_p_limit*2), ymax=cut_logyaxis, alpha=0.1, colour = grey(0.9))
     }
 
@@ -1012,9 +1045,9 @@ conf_dist <- function(
 
   if (length(estimate) >= 2 & together == FALSE) {
     if (plot_type %in% "pdf"){
-      p <- p + facet_wrap(~variable, scales = "free")
+      p <- p + facet_wrap(vars(variable), nrow = nrow, ncol = ncol, scales = "free")
     } else {
-      p <- p + facet_wrap(~variable, scales = "free_x")
+      p <- p + facet_wrap(vars(variable), nrow = nrow, ncol = ncol, scales = "free_x")
     }
   }
 
@@ -1042,14 +1075,14 @@ conf_dist <- function(
   # Add points for the counternull if specified
   #-----------------------------------------------------------------------------
 
-  if (!is.null(null_values) && plot_counternull == TRUE && plot_type %in% c("p_val", "s_val") && !all(is.na(res$res_frame$counternull))) {
+  if (!is.null(null_values) && isTRUE(plot_counternull) && plot_type %in% c("p_val", "s_val") && !all(is.na(res$res_frame$counternull))) {
 
-    if (together == TRUE & (length(estimate) >= 2)) {
+    if (isTRUE(together) & (length(estimate) >= 2)) {
 
       p <- p + geom_point(aes(x = values, y = counternull, colour = variable), size = 4, pch = 21, fill = "white", stroke = 1.7) +
         guides(colour = guide_legend(override.aes = list(pch = NA)))
 
-    } else if (together == FALSE | (together == TRUE & (length(estimate) < 2))) {
+    } else if (isFALSE(together) | (isTRUE(together) & (length(estimate) < 2))) {
 
       p <- p + geom_point(aes(x = values, y = counternull), colour = "black", size = 4, pch = 21, fill = "white", stroke = 1.7)
 
@@ -1060,7 +1093,7 @@ conf_dist <- function(
   # Make the plot prettier by increasing font size
   #-----------------------------------------------------------------------------
 
-  p <- p  + theme(
+  p <- p + theme(
     axis.title.y.left=element_text(colour = "black", size = 17, hjust = 0.5, margin = margin(0, 10, 0, 0)),
     axis.title.y.right=element_text(colour = "black", size = 17, hjust = 0.5, margin = margin(0, 0, 0, 10)),
     axis.title.x=element_text(colour = "black", size = 17),
@@ -1074,6 +1107,14 @@ conf_dist <- function(
     # strip.background=element_rect(fill="white")
     strip.text.x=element_text(size=15)
   )
+
+  #-----------------------------------------------------------------------------
+  # Add title and labels if specified
+  #-----------------------------------------------------------------------------
+
+  if (!is.null(title)) {
+    p <- p + ggtitle(title)
+  }
 
   res$plot <- p
 
@@ -1636,7 +1677,7 @@ wilson_cicc <- function(
 
   z <- qnorm((conf_level + 1)/2)
   x <- round(estimate*n) # To get number of successes/failures
-  estimate_compl <- 1 - estimate # Complement of estimate
+  estimate_compl <- (1 - estimate) # Complement of estimate
 
   lower <- max(0, (2*x + z^2 - 1 - z*sqrt(z^2 - 2 - 1/n + 4*estimate*(n*estimate_compl + 1)))/(2*(n + z^2)))
   upper <- min(1, (2*x + z^2 + 1 + z*sqrt(z^2 + 2 - 1/n + 4*estimate*(n*estimate_compl - 1)))/(2*(n + z^2)))
@@ -1837,13 +1878,6 @@ cdist_propdiff <- function(
   , null_values = NULL
   , alternative = NULL
 ){
-
-  # estimate <- c(0.5, 49/90)
-  # n <- c(100, 90)
-  # n_values <- 1e4
-  # conf_level <- c(0.95, 0.99)
-  # null_values <- c(0, 0.5)
-  # alternative <- "two_sided"
 
   eps <- 1e-15
 

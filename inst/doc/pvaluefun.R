@@ -1,8 +1,7 @@
-## ---- echo = FALSE-------------------------------------------------------
+## ----setup, include = FALSE, echo = FALSE--------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE
   , comment = "#>"
-  # , tidy.opts = list(width.cutoff = 160, tidy = FALSE)
 )
 
 ## ----load_package, message = FALSE, warning = FALSE, echo = TRUE, eval = TRUE----
@@ -15,7 +14,7 @@ library(pvaluefunctions)
 #  source_url("https://raw.githubusercontent.com/DInfanger/pvaluefunctions/master/R/confidence_distributions.R")
 #  
 
-## ----ttest, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
+## ----ttest, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
 #-----------------------------------------------------------------------------
 # T-Test
 #-----------------------------------------------------------------------------
@@ -39,7 +38,7 @@ res <- conf_dist(
   , null_values = c(0)
   , trans = "identity"
   , alternative = "two_sided"
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , xlab = "Mean difference (group 1 - group 2)"
   , together = FALSE
@@ -47,7 +46,7 @@ res <- conf_dist(
   , plot_counternull = TRUE
 )
 
-## ----linreg_single_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
+## ----linreg_single_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
 #-----------------------------------------------------------------------------
 # Model
 #-----------------------------------------------------------------------------
@@ -75,12 +74,13 @@ res <- conf_dist(
   , log_yaxis = TRUE
   , cut_logyaxis = 0.05
   , xlab = "Coefficient Agriculture"
+  , xlim = c(-0.12, 0.065)
   , together = FALSE
   , plot_p_limit = 1 - 0.999
   , plot_counternull = FALSE
 )
 
-## ----linreg_single_cdf, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
+## ----linreg_single_cdf, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
 res <- conf_dist(
   estimate = c(-0.02143)
   , df = c(43)
@@ -102,8 +102,7 @@ res <- conf_dist(
   , plot_counternull = FALSE
 )
 
-
-## ----linreg_multiple_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
+## ----linreg_multiple_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
 res <- conf_dist(
   estimate = c(0.13115, 0.04913)
   , df = c(43, 43)
@@ -116,15 +115,15 @@ res <- conf_dist(
   , null_values = c(0)
   , trans = "identity"
   , alternative = "two_sided"
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
-  , xlab = "Coefficients"
+  , xlab = "Regression coefficients"
   , together = TRUE
   , plot_p_limit = 1 - 0.999
   , plot_counternull = FALSE
 )
 
-## ----linreg_multiple_sval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
+## ----linreg_multiple_sval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
 res <- conf_dist(
   estimate = c(0.13115, 0.04913)
   , df = c(43, 43)
@@ -139,13 +138,13 @@ res <- conf_dist(
   , alternative = "two_sided"
   # , log_yaxis = TRUE
   # , cut_logyaxis = 0.05
-  , xlab = "Coefficients"
+  , xlab = "Regression coefficients"
   , together = TRUE
   , plot_p_limit = 1 - 0.999
   , plot_counternull = TRUE
 )
 
-## ----corr_pearson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
+## ----corr_pearson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
 #-----------------------------------------------------------------------------
 # Calculate Pearson's correlation coefficient
 #-----------------------------------------------------------------------------
@@ -167,7 +166,7 @@ res <- conf_dist(
   , null_values = c(0)
   , trans = "identity"
   , alternative = "one_sided"
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , xlab = "Pearson correlation"
   , together = TRUE
@@ -175,7 +174,7 @@ res <- conf_dist(
   , plot_counternull = FALSE
 )
 
-## ----logreg, message = FALSE, warning = FALSE, fig.width = 9.2, fig.height = 7.2, out.width = "80%", fig.align='center'----
+## ----logreg, message = FALSE, warning = FALSE, fig.width = 10.0, fig.height = 7.2, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
 #-----------------------------------------------------------------------------
 # Calculate logistic regression model using a dataset from UCLA
 #-----------------------------------------------------------------------------
@@ -201,19 +200,19 @@ res <- conf_dist(
   , n_values = 1e4L
   , est_names = c("GPA")
   , conf_level = c(0.95, 0.90, 0.80)
-  , null_values = c(log(1))
+  , null_values = c(log(1)) # null value on the log-odds scale
   , trans = "exp"
   , alternative = "two_sided"
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , xlab = "Odds Ratio (GPA)"
-  , xlim = log(c(0.4, 5))
+  , xlim = log(c(0.7, 5.2)) # axis limits on the log-odds scale
   , together = FALSE
   , plot_p_limit = 1 - 0.999
   , plot_counternull = TRUE
 )
 
-## ----prop, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
+## ----prop, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
 res <- conf_dist(
   estimate = c(0.44)
   , n = c(50)
@@ -225,7 +224,7 @@ res <- conf_dist(
   , null_values = c(0.5)
   , trans = "identity"
   , alternative = "two_sided"
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , xlab = "Proportion"
   # , xlim = log(c(0.95, 1.2))
@@ -234,7 +233,7 @@ res <- conf_dist(
   , plot_counternull = FALSE
 )
 
-## ----propdiff_Wilson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
+## ----propdiff_Wilson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
 res <- conf_dist(
   estimate = c(68/100, 98/150)
   , n = c(100, 150)
@@ -245,7 +244,7 @@ res <- conf_dist(
   , null_values = c(0)
   , trans = "identity"
   , alternative = "two_sided"
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , xlab = "Difference between proportions"
   , together = FALSE
@@ -253,7 +252,7 @@ res <- conf_dist(
   , plot_counternull = FALSE
 )
 
-## ----propdiff_agresticaffo, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center'----
+## ----propdiff_agresticaffo, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
 
 # First proportion
 
@@ -286,10 +285,10 @@ res <- conf_dist(
   , plot_type = "p_val"
   , n_values = 1e4L
   # , est_names = c("Estimate")
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , conf_level = c(0.95, 0.99)
-  , null_values = c(0, 0.3)
+  , null_values = c(0)
   , trans = "identity"
   , alternative = "two_sided"
   , xlab = "Difference of proportions"
@@ -300,7 +299,7 @@ res <- conf_dist(
 )
 
 
-## ----variance_calcs, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', eval = TRUE, echo = TRUE, fig.show = "hide"----
+## ----variance_calcs, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', eval = TRUE, echo = TRUE, fig.show = "hide", dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
 
 # Simulate some data from a normal distribution
 
@@ -314,7 +313,7 @@ res <- conf_dist(
   , plot_type = "pdf"
   , n_values = 1e4L
   , est_names = c("Variance")
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , conf_level = c(0.95)
   # , null_values = c(15^2, 18^2)
@@ -328,11 +327,11 @@ res <- conf_dist(
 )
 
 
-## ----variance_plot, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', eval = TRUE, echo = TRUE----
+## ----variance_plot, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', eval = TRUE, echo = TRUE, dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
 # Add vertical lines at the point estimates (mode, median, mean)
 
 res$plot + ggplot2::geom_vline(xintercept = as.numeric(res$point_est[1, 1:3]), linetype = 2, size = 1)
 
-## ----session_info, include=FALSE, echo=FALSE, eval = FALSE---------------
-#  sessionInfo()
+## ----session_info, include=TRUE, echo=FALSE------------------------------
+sessionInfo()
 

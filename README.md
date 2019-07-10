@@ -3,6 +3,9 @@ pvaluefunctions
 
   - [*P*-value functions
     <img src="man/figures/logo2.svg" align="right" width="120" />](#p-value-functions)
+  - [Accompanying paper](#accompanying-paper)
+      - [Recreation of the graphics in the
+        paper](#recreation-of-the-graphics-in-the-paper)
   - [Overview](#overview)
   - [Installation](#installation)
   - [Dependencies](#dependencies)
@@ -46,6 +49,21 @@ pvaluefunctions
 downloads](https://cranlogs.r-pkg.org/badges/grand-total/pvaluefunctions)](http://cranlogs.r-pkg.org/badges/grand-total/pvaluefunctions)
 [![Rdoc](http://www.rdocumentation.org/badges/version/pvaluefunctions)](http://www.rdocumentation.org/packages/pvaluefunctions)
 
+## Accompanying paper
+
+We published an [accompanying paper](https://doi.org/10.1002/sim.8293)
+to illustrate the use of *p*-value functions:
+
+Infanger D, Schmidt-Trucksäss A. (2019): *P* value functions: An
+underused method to present research results and to promote quantitative
+reasoning. *Statistics in Medicine,* 1-9. doi: 10.1002/sim.8293.
+
+### Recreation of the graphics in the paper
+
+The code and instructions to reproduce all graphics in our paper can be
+found in the following GitHub repository:
+<https://github.com/DInfanger/pvalue_functions>
+
 ## Overview
 
 This is the repository for the R-package
@@ -60,8 +78,7 @@ functions, confidence distributions, confidence densities, or the
 
 You can install the package directly from CRAN by typing
 `install.packages("pvaluefunctions")`. After installation, load it in R
-using
-`library(pvaluefunctions)`.
+using `library(pvaluefunctions)`.
 
 <!-- Download the file `confidence_distributions.R` to your computer. You can either `source()` the function in R or open it, select and run everything. After loading the function, it's ready for use. -->
 
@@ -151,7 +168,6 @@ The function has the following arguments:
   - `cut_logyaxis`: Numerical value indicating the threshold below which
     the y-axis will be displayed logarithmically. Must lie between 0 and
     1.
-  - `xlab` (optional): String indicating the label of the x-axis.
   - `xlim` (optional): Numerical vector of length 2 indicating the
     limits of the x-axis on the *untransformed* scale. For example: If
     you want to plot *p*-value functions for odds ratios from logistic
@@ -159,13 +175,25 @@ The function has the following arguments:
     overriden if null values are outside of this range.
   - `together`: Logical. Indicating if graphics for multiple estimates
     should be displayed together or on separate plots.
+  - `nrow`: (optional) Integer greater than 0 indicating the number of
+    rows when `together = FALSE` is specified for multiple estimates.
+    Used in `facet_wrap` in ggplot2.
+  - `ncol`: (optional) Integer greater than 0 indicating the number of
+    columns when `together = FALSE` is specified for multiple estimates.
+    Used in `facet_wrap` in ggplot2.
   - `plot_p_limit`: Numerical value indicating the lower limit of the
     y-axis. Must be greater than 0 for a logarithmic scale
     (i.e. `log_yaxis = TRUE`).
   - `plot_counternull`: Logical. Indicating if the counternull should be
     plotted as a point. Only available for -value functions and s-value
-    functions. If the counternull values are outside of the plotted
-    functions, they are not shown.
+    functions. Counternull values that are outside of the plotted
+    functions are not shown.
+  - `title` (optional): String containing a title for the plot.
+  - `xlab` (optional): String indicating the label of the x-axis.
+  - `ylab` (optional): String containing a title for the primary (left)
+    y-axis.
+  - `ylab_sec` (optional): String containing a title for the secondary
+    (right) y-axis.
 
 ### Required arguments for different estimate types
 
@@ -259,6 +287,14 @@ res <- conf_dist(
 ### Single coefficient from a linear regression model
 
 #### *P*-value function
+
+Because it’s difficult to see very small *p*-values in the graph, you
+can set the option `log_yaxis = TRUE` so that *p*-values (i.e. the
+y-axes) below the value set in `cut_logyaxis` will be plotted on a
+logarithmic scale. This will make it much easier to see small *p*-values
+but has the disadvantage of creating a “kink” in the *p*-value function
+which is a pure artifact and puts an undue emphasis on the specified
+cutoff.
 
 ``` r
 #-----------------------------------------------------------------------------
@@ -365,9 +401,9 @@ res <- conf_dist(
   , null_values = c(0)
   , trans = "identity"
   , alternative = "two_sided"
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
-  , xlab = "Coefficients"
+  , xlab = "Regression coefficients"
   , together = TRUE
   , plot_p_limit = 1 - 0.999
   , plot_counternull = FALSE
@@ -393,7 +429,7 @@ res <- conf_dist(
   , alternative = "two_sided"
   # , log_yaxis = TRUE
   # , cut_logyaxis = 0.05
-  , xlab = "Coefficients"
+  , xlab = "Regression coefficients"
   , together = TRUE
   , plot_p_limit = 1 - 0.999
   , plot_counternull = TRUE
@@ -437,7 +473,7 @@ res <- conf_dist(
   , null_values = c(0)
   , trans = "identity"
   , alternative = "one_sided"
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , xlab = "Pearson correlation"
   , together = TRUE
@@ -506,7 +542,7 @@ res <- conf_dist(
   , null_values = c(log(1)) # null value on the log-odds scale
   , trans = "exp"
   , alternative = "two_sided"
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , xlab = "Odds Ratio (GPA)"
   , xlim = log(c(0.7, 5.2)) # axis limits on the log-odds scale
@@ -520,6 +556,10 @@ res <- conf_dist(
 
 ### Proportion
 
+The *p*-value function (and thus the confidence intervals) are based on
+Wilson’s score interval and not the normal approximation. This means
+that the *p*-value function will never be outside the interval \[0, 1\].
+
 ``` r
 res <- conf_dist(
   estimate = c(0.44)
@@ -532,7 +572,7 @@ res <- conf_dist(
   , null_values = c(0.5)
   , trans = "identity"
   , alternative = "two_sided"
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , xlab = "Proportion"
   # , xlim = log(c(0.95, 1.2))
@@ -557,7 +597,7 @@ res <- conf_dist(
   , null_values = c(0)
   , trans = "identity"
   , alternative = "two_sided"
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , xlab = "Difference between proportions"
   , together = FALSE
@@ -613,7 +653,7 @@ res <- conf_dist(
   , plot_type = "p_val"
   , n_values = 1e4L
   # , est_names = c("Estimate")
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , conf_level = c(0.95, 0.99)
   , null_values = c(0, 0.3)
@@ -649,7 +689,7 @@ res <- conf_dist(
   , plot_type = "pdf"
   , n_values = 1e4L
   , est_names = c("Variance")
-  , log_yaxis = TRUE
+  , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , conf_level = c(0.95)
   # , null_values = c(15^2, 18^2)
@@ -677,11 +717,15 @@ Bender R, Berg G, Zeeb H. (2005): Tutorial: using confidence curves in
 medical research. *Biom J.* 47(2): 237-47.
 
 Fraser D. A. S. (2019): The *p*-value function and statistical
-inference. *The American Statistician,* 73:sup1, 135-147.
+inference. *Am Stat,* 73:sup1, 135-147.
 
 Greenland S (2019): Valid *P*-Values Behave Exactly as They Should: Some
 Misleading Criticisms of *P*-Values and Their Resolution with
-*S*-Values. *The American Statistician,* 73sup1, 106-114.
+*S*-Values. *Am Stat,* 73sup1, 106-114.
+
+Infanger D, Schmidt-Trucksäss A. (2019): *P* value functions: An
+underused method to present research results and to promote quantitative
+reasoning. *Stat Med,* 1-9. doi: 10.1002/sim.8293.
 
 Poole C. (1987a): Beyond the confidence interval. *Am J Public Health.*
 77(2): 195-9.
@@ -710,7 +754,7 @@ distribution estimator of a parameter: A review. *Internat Statist Rev.*
 
 ## Session info
 
-    #> R version 3.6.0 (2019-04-26)
+    #> R version 3.6.1 (2019-07-05)
     #> Platform: x86_64-w64-mingw32/x64 (64-bit)
     #> Running under: Windows 10 x64 (build 17134)
     #> 
@@ -725,25 +769,25 @@ distribution estimator of a parameter: A review. *Internat Statist Rev.*
     #> [1] stats     graphics  grDevices utils     datasets  methods   base     
     #> 
     #> other attached packages:
-    #> [1] pvaluefunctions_1.2.0
+    #> [1] pvaluefunctions_1.3.0
     #> 
     #> loaded via a namespace (and not attached):
-    #>  [1] Rcpp_1.0.1         RColorBrewer_1.1-2 pillar_1.4.1      
-    #>  [4] compiler_3.6.0     prettyunits_1.0.2  remotes_2.0.4     
-    #>  [7] tools_3.6.0        testthat_2.1.1     digest_0.6.19     
-    #> [10] pkgbuild_1.0.3     pkgload_1.0.2      tibble_2.1.2      
+    #>  [1] Rcpp_1.0.1         RColorBrewer_1.1-2 pillar_1.4.2      
+    #>  [4] compiler_3.6.1     prettyunits_1.0.2  remotes_2.1.0     
+    #>  [7] tools_3.6.1        testthat_2.1.1     digest_0.6.20     
+    #> [10] pkgbuild_1.0.3     pkgload_1.0.2      tibble_2.1.3      
     #> [13] gtable_0.3.0       evaluate_0.14      memoise_1.1.0     
-    #> [16] pkgconfig_2.0.2    rlang_0.3.4        cli_1.1.0         
-    #> [19] curl_3.3           yaml_2.2.0         xfun_0.7          
-    #> [22] dplyr_0.8.1        withr_2.1.2        stringr_1.4.0     
+    #> [16] pkgconfig_2.0.2    rlang_0.4.0        cli_1.1.0         
+    #> [19] curl_3.3           yaml_2.2.0         xfun_0.8          
+    #> [22] dplyr_0.8.3        withr_2.1.2        stringr_1.4.0     
     #> [25] knitr_1.23         desc_1.2.0         fs_1.3.1          
-    #> [28] devtools_2.0.2     tidyselect_0.2.5   rprojroot_1.3-2   
-    #> [31] grid_3.6.0         glue_1.3.1         R6_2.4.0          
-    #> [34] processx_3.3.1     rmarkdown_1.13     sessioninfo_1.1.1 
-    #> [37] zipfR_0.6-10       purrr_0.3.2        callr_3.2.0       
-    #> [40] ggplot2_3.1.1.9000 magrittr_1.5       scales_1.0.0      
+    #> [28] devtools_2.1.0     tidyselect_0.2.5   rprojroot_1.3-2   
+    #> [31] grid_3.6.1         glue_1.3.1         R6_2.4.0          
+    #> [34] processx_3.4.0     rmarkdown_1.13     sessioninfo_1.1.1 
+    #> [37] zipfR_0.6-10       purrr_0.3.2        callr_3.3.0       
+    #> [40] ggplot2_3.2.0.9000 magrittr_1.5       scales_1.0.0      
     #> [43] backports_1.1.4    ps_1.3.0           htmltools_0.3.6   
-    #> [46] usethis_1.5.0      assertthat_0.2.1   colorspace_1.4-1  
+    #> [46] usethis_1.5.1      assertthat_0.2.1   colorspace_1.4-1  
     #> [49] labeling_0.3       stringi_1.4.3      lazyeval_0.2.2    
     #> [52] munsell_0.5.0      crayon_1.3.4
 
