@@ -20,27 +20,29 @@ if (getRversion() >= "2.15.1") {
 #' @param stderr Numerical vector containing the standard error(s) of the estimate(s). Required for statistics based on the \emph{t}-distribution (e.g. linear regression) and the normal distribution (e.g. logistic regression). Must be equal the number of estimate(s).
 #' @param tstat Numerical vector contaiqning the \emph{t}-statistic(s). Required for \emph{t}-tests (means and mean differences). Must be equal the number of estimates.
 #' @param type String indicating the type of the estimate. Must be one of the following: \code{ttest}, \code{linreg}, \code{gammareg}, \code{general_t}, \code{logreg}, \code{poisreg}, \code{coxreg}, \code{general_z}, \code{pearson}, \code{spearman}, \code{kendall}, \code{var}, \code{prop}, \code{propdiff}.
-#' @param plot_type String indicating the type of plot. Must be one of the following: \code{cdf} (confidence distribution), \code{pdf} (confidence density), \code{p_val} (\emph{p}-value function), \code{s_val} (Surprisal value functions). For differences between independent proportions, only \emph{p}-value functions and Surprisal values are available.
+#' @param plot_type String indicating the type of plot. Must be one of the following: \code{cdf} (confidence distribution), \code{pdf} (confidence density), \code{p_val} (\emph{p}-value function, the default), \code{s_val} (Surprisal value functions). For differences between independent proportions, only \emph{p}-value functions and Surprisal values are available.
 #' @param n_values (optional) Integer indicating the number of points that are used to generate the graphics. The higher this number, the higher the computation time and resolution.
 #' @param est_names (optional) String vector indicating the names of the estimate(s). Must be equal the number of estimates.
 #' @param conf_level (optional) Numerical vector indicating the confidence level(s). Bust be between 0 and 1.
-#' @param null_values (optional) Numerical vector indicating the null value(s) in the plot on the \emph{untransformed} scale. For example: The null values for an odds ratio of 1 is 0 on the log-odds scale.
-#' @param trans (optional) String indicating the transformation function that will be applied to the estimates and confidence curves. For example: \code{"exp"} for an exponential transformation of the log-odds in logistic regression.
+#' @param null_values (optional) Numerical vector indicating the null value(s) in the plot on the \emph{untransformed (original)} scale. For example: The null values for an odds ratio of 1 is 0 on the log-odds scale. If x limits are specified with \code{xlim}, all null values outside of the specified x limits are ignored for plotting and a message is printed.
+#' @param trans (optional) String indicating the transformation function that will be applied to the estimates and confidence curves. For example: \code{"exp"} for an exponential transformation of the log-odds in logistic regression. Can be a custom function.
 #' @param alternative String indicating if the confidence level(s) are two-sided or one-sided. Must be one of the following: \code{two_sided}, \code{one_sided}.
 #' @param log_yaxis Logical. Indicating if a portion of the y-axis should be displayed on the logarithmic scale.
 #' @param cut_logyaxis Numerical value indicating the threshold below which the y-axis will be displayed logarithmically. Must lie between 0 and 1.
-#' @param xlim (optional) Optional numerical vector of length 2 indicating the limits of the x-axis on the \emph{untransformed} scale. For example: If you want to plot \emph{p}-value functions for odds ratios from logistic regressions, the limits have to be given on the log-odds scale. Get's overriden if null values are outside of this range.
+#' @param xlim (optional) Optional numerical vector of length 2 (x1, x2) indicating the limits of the x-axis on the \emph{untransformed} scale if \code{trans} is not \code{identity}. The scale of the x-axis set by \code{x_scale} does not affect the x limits. For example: If you want to plot \emph{p}-value functions for odds ratios from logistic regressions, the limits have to be given on the log-odds scale if \code{trans = "exp"}. Note that x1 > x2 is allowed but then x2 will be the left limit and x1 the right limit (i.e. the limits are sorted before plotting). Null values (specified in \code{null_values}) that are outside of the specified limits are ignored and a message is printed.
 #' @param together Logical. Indicating if graphics for multiple estimates should be displayed together or on separate plots.
 #' @param nrow (optional) Integer greater than 0 indicating the number of rows when \code{together = FALSE} is specified for multiple estimates. Used in \code{facet_wrap} in ggplot2.
 #' @param ncol (optional) Integer greater than 0 indicating the number of columns when \code{together = FALSE} is specified for multiple estimates. Used in \code{facet_wrap} in ggplot2.
-#' @param plot_p_limit Numerical value indicating the lower limit of the y-axis. Must be greater than 0 for a logarithmic scale (i.e. \code{log_yaxis = TRUE}).
+#' @param plot_p_limit Numerical value indicating the lower limit of the y-axis. Must be greater than 0 for a logarithmic scale (i.e. \code{log_yaxis = TRUE}). The default is to omit plotting \emph{p}-values smaller than 1 - 0.999 = 0.001.
 #' @param plot_counternull Logical. Indicating if the counternull should be plotted as a point. Only available for \emph{p}-value functions and s-value functions. Counternull values that are outside of the plotted functions are not shown.
 #' @param title (optional) String containing a title of the plot.
 #' @param xlab (optional) String indicating the label of the x-axis.
 #' @param ylab (optional) String indicating the title for the primary (left) y-axis.
 #' @param ylab_sec (optional) String indicating the title for the secondary (right) y-axis.
+#' @param inverted Logical. Indicating the orientation of the y-axis for the \emph{P}-value function (\code{p_val}), S-value function (\code{s_val}) and the confidence distribution (\code{cdf}). By default (i.e. \code{inverted = FALSE}) small \emph{P}-values are plotted at the bottom and large ones at the top so that the cusp of the \emph{P}-value function is a the top. By setting \code{inverted = TRUE}, the y-axis is inverted. Ignored for confidence densities.
+#' @param x_scale String indicating the scaling of the x-axis. The default is to scale the x-axis logarithmically if the transformation specified in \code{trans} is "exp" (exponential) and linearly otherwise. The option \code{linear} (can be abbreviated) forces a linear scaling and the option \code{logarithm} (can be abbreviated) forces a logarithmic scaling, regardless what has been specified in \code{trans}.
 #'
-#' @return \code{conf_dist} returns four data frames and a ggplot2-plot object: \code{res_frame} (contains parameter values, \emph{p}-values, s-values, confidence distribution and density, variable names and type of hypothesis), \code{conf_frame} (contains the used confidence level(s) and the corresponding lower and upper limits as well as the corresponding variable name), \code{counternull_frame} (contains the counternull for the corresponding null values), \code{point_est} (contains the mean, median and mode point estimates) and \code{plot} (a ggplot2-plot).
+#' @return \code{conf_dist} returns four data frames and a ggplot2-plot object: \code{res_frame} (contains parameter values, \emph{p}-values (one- and two-sided), s-values, confidence distribution and density, variable names and type of hypothesis), \code{conf_frame} (contains the specified confidence level(s) and the corresponding lower and upper limits as well as the corresponding variable name), \code{counternull_frame} (contains the counternull and the corresponding null values), \code{point_est} (contains the mean, median and mode point estimates) and \code{plot} (a ggplot2-plot object).
 #' @references Bender R, Berg G, Zeeb H. Tutorial: using confidence curves in medical research. \emph{Biom J.} 2005;47(2):237-247.
 #'
 #' Bonett DG, Wright TA. Sample size requirements for estimating Pearson, Kendall and Spearman correlations. \emph{Psychometrika.} 2000;65(1):23-28.
@@ -87,6 +89,11 @@ if (getRversion() >= "2.15.1") {
 #'   , together = TRUE
 #'   , plot_p_limit = 1 - 0.9999
 #'   , plot_counternull = TRUE
+#'   , title = NULL
+#'   , ylab = NULL
+#'   , ylab_sec = NULL
+#'   , inverted = FALSE
+#'   , x_scale = "default"
 #' )
 #'
 #' #======================================================================================
@@ -113,6 +120,40 @@ if (getRversion() >= "2.15.1") {
 #'   , together = FALSE
 #'   , plot_p_limit = 1 - 0.999
 #'   , plot_counternull = FALSE
+#'   , title = NULL
+#'   , ylab = NULL
+#'   , ylab_sec = NULL
+#'   , inverted = FALSE
+#'   , x_scale = "default"
+#' )
+#'
+#' #=======================================================================================
+#' # P-value function for an odds ratio (logistic regression), plotted with inverted y-axis
+#' #=======================================================================================
+#'
+#' res <- conf_dist(
+#'   estimate = c(0.804037549)
+#'   , stderr = c(0.331819298)
+#'   , type = "logreg"
+#'   , plot_type = "p_val"
+#'   , n_values = 1e4L
+#'   , est_names = c("GPA")
+#'   , conf_level = c(0.95, 0.90, 0.80)
+#'   , null_values = c(log(1)) # null value on the log-odds scale
+#'   , trans = "exp"
+#'   , alternative = "two_sided"
+#'   , log_yaxis = FALSE
+#'   , cut_logyaxis = 0.05
+#'   , xlab = "Odds Ratio (GPA)"
+#'   , xlim = log(c(0.7, 5.2)) # axis limits on the log-odds scale
+#'   , together = FALSE
+#'   , plot_p_limit = 1 - 0.999
+#'   , plot_counternull = TRUE
+#'   , title = NULL
+#'   , ylab = NULL
+#'   , ylab_sec = NULL
+#'   , inverted = TRUE
+#'   , x_scale = "default"
 #' )
 #'
 #' #======================================================================================
@@ -135,6 +176,11 @@ if (getRversion() >= "2.15.1") {
 #'   , together = FALSE
 #'   , plot_p_limit = 1 - 0.9999
 #'   , plot_counternull = FALSE
+#'   , title = NULL
+#'   , ylab = NULL
+#'   , ylab_sec = NULL
+#'   , inverted = FALSE
+#'   , x_scale = "default"
 #' )
 #'
 #' #======================================================================================
@@ -167,7 +213,6 @@ if (getRversion() >= "2.15.1") {
 #'   , type = "general_z"
 #'   , plot_type = "p_val"
 #'   , n_values = 1e4L
-#'   # , est_names = c("Estimate")
 #'   , log_yaxis = FALSE
 #'   , cut_logyaxis = 0.05
 #'   , conf_level = c(0.95, 0.99)
@@ -175,17 +220,59 @@ if (getRversion() >= "2.15.1") {
 #'   , trans = "identity"
 #'   , alternative = "two_sided"
 #'   , xlab = "Difference of proportions"
-#'   # , xlim = c(-0.75, 0.5)
 #'   , together = FALSE
 #'   , plot_p_limit = 1 - 0.9999
 #'   , plot_counternull = FALSE
 #'   , title = "P-value function for the difference of two independent proportions"
+#'   , ylab = NULL
+#'   , ylab_sec = NULL
+#'   , inverted = FALSE
+#'   , x_scale = "default"
 #' )
 #'
-#' @seealso \code{\link[concurve]{plotpint}}
+#' #========================================================================================
+#' # P-value function and confidence distribution for the relative survival effect (1 - HR%)
+#' # Replicating Figure 1 in Bender et al. (2005)
+#' #========================================================================================
+#'
+#' # Define the transformation function and its inverse for the relative survival effect
+#'
+#' rse_fun <- function(x){ # x is the log-hazard ratio
+#'   100*(1 - exp(x))
+#' }
+#'
+#' rse_fun_inv <- function(x){
+#'   log(1 - (x/100))
+#' }
+#'
+#' res <- conf_dist(
+#'   estimate = log(0.72)
+#'   , stderr = 0.187618
+#'   , type = "coxreg"
+#'   , plot_type = "p_val"
+#'   , n_values = 1e4L
+#'   , est_names = c("RSE")
+#'   , conf_level = c(0.95, 0.8, 0.5)
+#'   , null_values = rse_fun_inv(0)
+#'   , trans = "rse_fun"
+#'   , alternative = "two_sided"
+#'   , log_yaxis = FALSE
+#'   , cut_logyaxis = 0.05
+#'   , xlab = "Relative survival effect (1 - HR%)"
+#'   , xlim = rse_fun_inv(c(-30, 60))
+#'   , together = FALSE
+#'   , plot_p_limit = 1 - 0.999
+#'   , plot_counternull = TRUE
+#'   , inverted = TRUE
+#'   , title = "Figure 1 in Bender et al. (2005)"
+#'   , x_scale = "default"
+#' )
+#'
+#' @seealso \code{\link[concurve]{ggconcurve}}
 #'
 #' @import stats ggplot2 scales
 #' @importFrom grDevices grey
+#' @importFrom utils find
 #' @export
 
 conf_dist <- function(
@@ -195,13 +282,13 @@ conf_dist <- function(
   , stderr= NULL
   , tstat = NULL
   , type = NULL
-  , plot_type = "p_val"
+  , plot_type = c("p_val", "s_val", "cdf", "pdf")
   , n_values = 1e4L
   , est_names = NULL
   , conf_level = NULL
   , null_values = NULL
   , trans = "identity"
-  , alternative = "two_sided"
+  , alternative = c("two_sided", "one_sided")
   , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , xlab = NULL
@@ -214,6 +301,8 @@ conf_dist <- function(
   , title = NULL
   , ylab = NULL
   , ylab_sec = NULL
+  , inverted = FALSE
+  , x_scale = c("default", "linear", "logarithm")
 ) {
 
   #-----------------------------------------------------------------------------
@@ -231,14 +320,22 @@ conf_dist <- function(
   # Safety checks and clean ups
   #-----------------------------------------------------------------------------
 
-  alternative <- gsub("[-|.]", "_", alternative)
-  alternative <- tolower(alternative)
+  # alternative <- gsub("[-|.]", "_", alternative)
+  # alternative <- tolower(alternative)
+  alternative <- match.arg(alternative)
   trans <- tolower(trans)
   type <- tolower(type)
-  plot_type <- gsub("[-|.]", "_", plot_type)
-  plot_type <- tolower(plot_type)
+  # plot_type <- gsub("[-|.]", "_", plot_type)
+  # plot_type <- tolower(plot_type)
+  plot_type <- match.arg(plot_type)
   plot_p_limit <- round(plot_p_limit, 10)
   cut_logyaxis <- round(cut_logyaxis, 10)
+  # x_scale <- tolower(x_scale)
+  x_scale <- match.arg(x_scale)
+
+  # if (!x_scale %in% "default") {
+  #   x_scale <- substr(x_scale, 1, 3) # abbreviate the string to the first 3 letters if not "default"
+  # }
 
   if (is.null(estimate)) {stop("Please provide an estimate.")}
 
@@ -263,12 +360,12 @@ conf_dist <- function(
     cat("\nTransformation changed to identity.\n")
   }
 
-  if (!plot_type %in% c("p_val", "cdf", "pdf", "s_val")) {
-    stop("plot_type must be one of: p_val, cdf, pdf or s_val.")
+  if (!trans %in% "identity" && length(find(trans)) == 0) {
+    stop(paste0("Function ", trans, " was not found."))
   }
 
-  # if (!trans %in% c("identity", "exp", "log", "sqrt")) {
-  #   stop("Only exponential, logarithmic and square root transformations are supported.")
+  # if (!plot_type %in% c("p_val", "cdf", "pdf", "s_val")) {
+  #   stop("plot_type must be one of: p_val, cdf, pdf or s_val.")
   # }
 
   if (type %in% c("prop", "propdiff") && (any(estimate < 0) || any(estimate > 1))) {
@@ -315,17 +412,21 @@ conf_dist <- function(
     stop("Provide only one estimate name for a proportion difference.")
   }
 
-  if (!is.null(xlim) && (length(xlim) != 2L)) {
-    stop("Please provide two limits for the x-axis.")
-  }
-
   if (!is.null(xlim)) {
+    if ((length(xlim) != 2L)) {
+      stop("Please provide two limits for the x-axis.")
+    }
+
+    if (any(is.na(xlim)) || any(!is.finite(xlim))) {
+      stop("Missing or infinite values are not allowed for x-axis limits (xlim). Please provide exactly two finite x-axis limits.")
+    }
+
     xlim <- sort(xlim, decreasing = FALSE)
   }
 
-  if ((length(type) == 0L) || (!type %in% c("ttest", "linreg", "gammareg", "general_t", "logreg", "poisreg", "coxreg", "general_z", "pearson", "spearman", "kendall", "var", "prop", "propdiff"))) {
-    stop("\"type\" must be one of: ttest, linreg, gammareg, general_t, logreg, poisreg, coxreg, general_z, pearson, spearman, kendall, var, prop and propdiff.")
-  }
+  # if ((length(type) == 0L) || (!type %in% c("ttest", "linreg", "gammareg", "general_t", "logreg", "poisreg", "coxreg", "general_z", "pearson", "spearman", "kendall", "var", "prop", "propdiff"))) {
+  #   stop("\"type\" must be one of: ttest, linreg, gammareg, general_t, logreg, poisreg, coxreg, general_z, pearson, spearman, kendall, var, prop and propdiff.")
+  # }
 
   if (is.null(est_names)) {
     if (type %in% "propdiff") {
@@ -385,6 +486,14 @@ conf_dist <- function(
 
   if (!type %in% "propdiff" && isFALSE(together) && (length(estimate) > 1L) && !is.null(nrow) && !is.null(ncol) && (nrow*ncol < length(estimate))) {
     stop("nrow * ncol must be greater than or equal the number of estimates to be plotted if together = FALSE.")
+  }
+
+  # if (!x_scale %in% c("default", "lin", "log")) {
+  #   stop("x_scale must be: default, linear (lin), logarithm (log).")
+  # }
+
+  if ((trans %in% "exp") && (x_scale %in% "default")) {
+    x_scale <- "log"
   }
 
   #-----------------------------------------------------------------------------
@@ -673,7 +782,7 @@ conf_dist <- function(
       res$counternull_frame$null_value <- do.call(trans, list(x = res$counternull_frame$null_value))
     }
 
-    xlim <- do.call(trans, list(x = xlim))
+    xlim <- sort(do.call(trans, list(x = xlim)), decreasing = FALSE)
 
   }
 
@@ -878,65 +987,132 @@ conf_dist <- function(
       breaks_two <- unique(breaks_two)
       breaks_one <- unique(breaks_one)
 
-      p <- p +
-        scale_y_continuous(
-          limits = c(ifelse(alternative %in% "two_sided", plot_p_limit, plot_p_limit*2), 1)
-          , breaks = breaks_two
-          , labels = lab_twosided
-          , trans = magnify_trans_log(interval_low = cut_logyaxis, interval_high = 1, reducer = cut_logyaxis, reducer2 = 8)
-          , sec.axis = sec_axis(
-            trans = ~.*(1/2)
-            , name = ylab_sec
-            , breaks = breaks_one
-            , labels = lab_onesided
-          )
-        ) +
-        annotate("rect", xmin=-Inf, xmax=Inf, ymin=ifelse(alternative %in% "two_sided", plot_p_limit, plot_p_limit*2), ymax=cut_logyaxis, alpha=0.1, colour = grey(0.9))
+      if (isTRUE(inverted)) {
 
-    } else if (log_yaxis == FALSE | (p_cutoff >= cut_logyaxis)) {
-      p <- p +
-        scale_y_continuous(
-          # limits = c(plot_p_limit, 1)
-          breaks = seq(0, 1, 0.1)
-          , sec.axis = sec_axis(
-            ~.*(1/2)
-            , name = ylab_sec
-            , breaks = seq(0, 1, 0.1)/2
+        p <- p +
+          scale_y_continuous(
+            limits = rev(c(ifelse(alternative %in% "two_sided", plot_p_limit, plot_p_limit*2), 1))
+            , breaks = breaks_two
+            , labels = lab_twosided
+            , trans = magnify_trans_log_rev(interval_low = cut_logyaxis, interval_high = 1, reducer = cut_logyaxis, reducer2 = 8)
+            , sec.axis = sec_axis(
+              trans = ~.*(1/2)
+              , name = ylab_sec
+              , breaks = breaks_one
+              , labels = lab_onesided
+            )
+          ) +
+          annotate("rect", xmin=-Inf, xmax=Inf, ymin=ifelse(alternative %in% "two_sided", plot_p_limit, plot_p_limit*2), ymax=cut_logyaxis, alpha=0.1, colour = grey(0.9))
+
+      } else {
+        p <- p +
+          scale_y_continuous(
+            limits = c(ifelse(alternative %in% "two_sided", plot_p_limit, plot_p_limit*2), 1)
+            , breaks = breaks_two
+            , labels = lab_twosided
+            , trans = magnify_trans_log(interval_low = cut_logyaxis, interval_high = 1, reducer = cut_logyaxis, reducer2 = 8)
+            , sec.axis = sec_axis(
+              trans = ~.*(1/2)
+              , name = ylab_sec
+              , breaks = breaks_one
+              , labels = lab_onesided
+            )
+          ) +
+          annotate("rect", xmin=-Inf, xmax=Inf, ymin=ifelse(alternative %in% "two_sided", plot_p_limit, plot_p_limit*2), ymax=cut_logyaxis, alpha=0.1, colour = grey(0.9))
+      }
+
+    } else if (isFALSE(log_yaxis) | (p_cutoff >= cut_logyaxis)) {
+
+      if (isTRUE(inverted)) {
+        p <- p +
+          scale_y_reverse(
+            # limits = c(plot_p_limit, 1)
+            breaks = seq(0, 1, 0.1)
+            , sec.axis = sec_axis(
+              ~.*(1/2)
+              , name = ylab_sec
+              , breaks = seq(0, 1, 0.1)/2
+            )
           )
-        )
+      } else {
+        p <- p +
+          scale_y_continuous(
+            # limits = c(plot_p_limit, 1)
+            breaks = seq(0, 1, 0.1)
+            , sec.axis = sec_axis(
+              ~.*(1/2)
+              , name = ylab_sec
+              , breaks = seq(0, 1, 0.1)/2
+            )
+          )
+      }
     }
   }
 
-  # For s-value curves: Reverse the y-axis and transform it according to log2
+  # For s-value curves: inverted the y-axis and transform it according to log2
 
   if (plot_type %in% "s_val") {
 
-    p <- p + scale_y_reverse(
-      limits = c(max(res$res_frame$s_val, na.rm = TRUE), 0)
-      , breaks = scales::pretty_breaks(n = 10)(c(0, max(res$res_frame$s_val, na.rm = TRUE)))
-      , sec.axis = sec_axis(
-        trans = ~. + log2(2)
-        , name = ylab_sec
-        , breaks = scales::pretty_breaks(n = 10)(c(1, -log2(min(res$res_frame$p_two, na.rm = TRUE)/2)))
+    if (isTRUE(inverted)) {
+      p <- p + scale_y_continuous(
+        limits = rev(c(max(res$res_frame$s_val, na.rm = TRUE), 0))
+        , breaks = scales::pretty_breaks(n = 10)(c(0, max(res$res_frame$s_val, na.rm = TRUE)))
+        , sec.axis = sec_axis(
+          trans = ~. + log2(2)
+          , name = ylab_sec
+          , breaks = scales::pretty_breaks(n = 10)(c(1, -log2(min(res$res_frame$p_two, na.rm = TRUE)/2)))
+        )
       )
-    )
+    } else {
+      p <- p + scale_y_reverse(
+        limits = c(max(res$res_frame$s_val, na.rm = TRUE), 0)
+        , breaks = scales::pretty_breaks(n = 10)(c(0, max(res$res_frame$s_val, na.rm = TRUE)))
+        , sec.axis = sec_axis(
+          trans = ~. + log2(2)
+          , name = ylab_sec
+          , breaks = scales::pretty_breaks(n = 10)(c(1, -log2(min(res$res_frame$p_two, na.rm = TRUE)/2)))
+        )
+      )
+    }
+  }
 
+  # Y-axis formatting For confidence distributions and densities
+
+  if (plot_type %in% c("cdf", "pdf")) {
+
+    # For the confidence distributions (plot_type == "cdf"), inverted y-axis if specified
+
+    if (plot_type %in% c("cdf") && isTRUE(inverted)) {
+      p <- p + scale_y_continuous(trans = "reverse", breaks = scales::pretty_breaks(n = 10))
+    } else {
+      p <- p + scale_y_continuous(breaks = scales::pretty_breaks(n = 10))
+    }
   }
 
   #-----------------------------------------------------------------------------
   # x-axis
   #-----------------------------------------------------------------------------
 
-  if (trans %in% "exp") {
+  # if (trans %in% "exp") {
+  if (x_scale %in% "log") {
 
     # Plot x-axis on a log-scale (can't set "xlim" here, because then the gray area cannot be added!)
     p <- p + scale_x_continuous(trans = "log", breaks = scales::pretty_breaks(n = 10))
 
     # If y-axis is plotted on a log-scale, re-add the gray rectangle
-    if (isTRUE(log_yaxis)) {
-      p <- p + annotate("rect", xmin=0, xmax=100, ymin=ifelse(alternative %in% "two_sided", plot_p_limit, plot_p_limit*2), ymax=cut_logyaxis, alpha=0.1, colour = grey(0.9))
+    if (plot_type %in% c("p_val") && isTRUE(log_yaxis)) {
+      p <- p + annotate(
+        "rect"
+        , xmin = 0
+        , xmax = 100
+        , ymin = ifelse(alternative %in% "two_sided", plot_p_limit, plot_p_limit*2)
+        , ymax = cut_logyaxis
+        , alpha = 0.1
+        , colour = grey(0.9)
+      )
     }
-
+  } else {
+    p <- p + scale_x_continuous(breaks = scales::pretty_breaks(n = 10))
   }
 
   # Set x-limits now
@@ -965,16 +1141,38 @@ conf_dist <- function(
 
   if (!is.null(null_values)) {
 
-    plot_limits <- do.call(trans, list(x = ggplot_build(p)$layout$panel_params[[1]]$x.range))
+    if (trans %in% "exp" && x_scale %in% "log") { # If the x-axis was log-transformed, we need to backtransforme the plotting limits because they are given on the log-scale
+      plot_limits <- do.call(trans, list(x = ggplot_build(p)$layout$panel_params[[1]]$x.range))
+    } else if (!trans %in% "exp" && x_scale %in% "log") {
+      plot_limits <- exp(ggplot_build(p)$layout$panel_params[[1]]$x.range)
+    } else {
+      plot_limits <- ggplot_build(p)$layout$panel_params[[1]]$x.range
+    }
 
     # Which null_values are outside of the plotting limits
 
     null_outside_plot <- which((res$counternull_frame$null_value <= plot_limits[1]) | (res$counternull_frame$null_value >= plot_limits[2]))
 
     # Only add lines for those null values that are inside the plotting limits
-    if (length(null_outside_plot) > 0 && length(null_outside_plot) < length(null_values)) {
-      p <- p + geom_vline(data = res$counternull_frame, aes(xintercept = null_value), linetype = 1, size = 0.5)
-    } else if (length(null_outside_plot) == 0) {
+
+    if (length(null_outside_plot) > 0) {
+
+      # Print a message that shows which null values were outside of the x-axis limits.
+
+      message(paste0("The following null values are outside of the specified x-axis range (xlim) and are not shown: ", paste(res$counternull_frame$null_value[null_outside_plot], collapse = ", ")))
+
+      if ((length(null_outside_plot) < length(null_values))) { # There are some null-values to plot
+
+        p <- p + geom_vline(data = res$counternull_frame, aes(xintercept = null_value), linetype = 1, size = 0.5)
+
+      } else if ((length(null_outside_plot) == length(null_values))) { # All null-values outside of plotting area
+
+        p <- p + geom_vline(data = res$counternull_frame[-null_outside_plot, ], aes(xintercept = null_value), linetype = 1, size = 0.5)
+
+      }
+
+    } else if (length(null_outside_plot) == 0) { # No null-values outside of plot
+
       p <- p + geom_vline(data = res$counternull_frame, aes(xintercept = null_value), linetype = 1, size = 0.5)
 
     }
@@ -1043,7 +1241,7 @@ conf_dist <- function(
   # Facets for multiple estimates not plotted together
   #-----------------------------------------------------------------------------
 
-  if (length(estimate) >= 2 & together == FALSE) {
+  if (length(estimate) >= 2 & isFALSE(together)) {
     if (plot_type %in% "pdf"){
       p <- p + facet_wrap(vars(variable), nrow = nrow, ncol = ncol, scales = "free")
     } else {
@@ -1075,7 +1273,7 @@ conf_dist <- function(
   # Add points for the counternull if specified
   #-----------------------------------------------------------------------------
 
-  if (!is.null(null_values) && isTRUE(plot_counternull) && plot_type %in% c("p_val", "s_val") && !all(is.na(res$res_frame$counternull))) {
+  if (!is.null(null_values) && isTRUE(plot_counternull) && (plot_type %in% c("p_val", "s_val")) && !all(is.na(res$res_frame$counternull))) {
 
     if (isTRUE(together) & (length(estimate) >= 2)) {
 
@@ -1094,18 +1292,18 @@ conf_dist <- function(
   #-----------------------------------------------------------------------------
 
   p <- p + theme(
-    axis.title.y.left=element_text(colour = "black", size = 17, hjust = 0.5, margin = margin(0, 10, 0, 0)),
-    axis.title.y.right=element_text(colour = "black", size = 17, hjust = 0.5, margin = margin(0, 0, 0, 10)),
-    axis.title.x=element_text(colour = "black", size = 17),
-    # axis.title.y=element_text(size=15,hjust=0.5, vjust=1),
-    axis.text.x=element_text(colour = "black", size=15),
-    axis.text.y=element_text(colour = "black", size=15),
-    # plot.margin=unit(c(2,2,2,2,2),"line"),
-    panel.grid.minor.y = element_blank(),
-    # panel.grid.major = element_line(colour=grey(0.8), size=0.5),
-    plot.title = element_text(face = "bold"),
-    # strip.background=element_rect(fill="white")
-    strip.text.x=element_text(size=15)
+    axis.title.y.left=element_text(colour = "black", size = 17, hjust = 0.5, margin = margin(0, 10, 0, 0))
+    , axis.title.y.right=element_text(colour = "black", size = 17, hjust = 0.5, margin = margin(0, 0, 0, 10))
+    , axis.title.x=element_text(colour = "black", size = 17)
+    # , axis.title.y=element_text(size=15,hjust=0.5, vjust=1)
+    , axis.text.x=element_text(colour = "black", size=15)
+    , axis.text.y=element_text(colour = "black", size=15)
+    # , plot.margin=unit(c(2,2,2,2,2),"line")
+    , panel.grid.minor.y = element_blank()
+    # , panel.grid.major = element_line(colour=grey(0.8), size=0.5)
+    , plot.title = element_text(face = "bold")
+    # , strip.background=element_rect(fill="white")
+    , strip.text.x=element_text(size=15)
   )
 
   #-----------------------------------------------------------------------------
@@ -2062,6 +2260,31 @@ magnify_trans_log <- function(interval_low = 0.05, interval_high = 1,  reducer =
   })
 
   trans_new(name = 'customlog', transform = trans, inverse = inv, domain = c(1e-16, Inf))
+}
+
+magnify_trans_log_rev <- function(interval_low = 0.05, interval_high = 1,  reducer = 0.05, reducer2 = 8) {
+
+  trans <- Vectorize(function(x, i_low = interval_low, i_high = interval_high, r = reducer, r2 = reducer2) {
+    -if(is.na(x) || (x >= i_low & x <= i_high)) {
+      x
+    } else if(x < i_low & !is.na(x)) {
+      (log10(x / r)/r2 + i_low)
+    } else {
+      log10((x - i_high)/r + i_high)/r2 + i_high
+    }
+  })
+
+  inv <- Vectorize(function(x, i_low = interval_low, i_high = interval_high, r = reducer, r2 = reducer2) {
+    if(is.na(x) || (-x >= i_low & -x <= i_high)) {
+      -x
+    } else if(-x < i_low & !is.na(x)) {
+      (10^(-(i_low + x)*r2)*r)
+    } else {
+      i_high + 10^(-r2*(i_high + x))*r - i_high*r
+    }
+  })
+
+  trans_new(name = 'customlog_rev', transform = trans, inverse = inv, domain = c(1e-16, Inf))
 }
 
 # # Surprisal transformation

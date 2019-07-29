@@ -44,6 +44,7 @@ res <- conf_dist(
   , together = FALSE
   , plot_p_limit = 1 - 0.999
   , plot_counternull = TRUE
+  , x_scale = "line"
 )
 
 ## ----linreg_single_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
@@ -121,6 +122,7 @@ res <- conf_dist(
   , together = TRUE
   , plot_p_limit = 1 - 0.999
   , plot_counternull = FALSE
+  , inverted = FALSE
 )
 
 ## ----linreg_multiple_sval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
@@ -210,6 +212,7 @@ res <- conf_dist(
   , together = FALSE
   , plot_p_limit = 1 - 0.999
   , plot_counternull = TRUE
+  , x_scale = "default"
 )
 
 ## ----prop, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
@@ -222,15 +225,16 @@ res <- conf_dist(
   # , est_names = c("")
   , conf_level = c(0.95, 0.90, 0.80)
   , null_values = c(0.5)
-  , trans = "identity"
+  , trans = "exp"
   , alternative = "two_sided"
   , log_yaxis = FALSE
   , cut_logyaxis = 0.05
   , xlab = "Proportion"
-  # , xlim = log(c(0.95, 1.2))
+  # , xlim = c(0.25, 0.65)
   , together = FALSE
   , plot_p_limit = 1 - 0.999
-  , plot_counternull = FALSE
+  , plot_counternull = TRUE
+  , x_scale = "default"
 )
 
 ## ----propdiff_Wilson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
@@ -300,7 +304,6 @@ res <- conf_dist(
 
 
 ## ----variance_calcs, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', eval = TRUE, echo = TRUE, fig.show = "hide", dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
-
 # Simulate some data from a normal distribution
 
 set.seed(142857)
@@ -331,6 +334,79 @@ res <- conf_dist(
 # Add vertical lines at the point estimates (mode, median, mean)
 
 res$plot + ggplot2::geom_vline(xintercept = as.numeric(res$point_est[1, 1:3]), linetype = 2, size = 1)
+
+## ----rse_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+# Define the transformation function and its inverse for the relative survival effect
+
+rse_fun <- function(x){
+  100*(1 - exp(x))
+}
+
+rse_fun_inv <- function(x){
+  log(1 - (x/100))
+}
+
+res <- conf_dist(
+  estimate = c(log(0.72))
+  , stderr = (0.187618)
+  , type = "coxreg"
+  , plot_type = "p_val"
+  , n_values = 1e4L
+  , est_names = c("RSE")
+  , conf_level = c(0.95, 0.8, 0.5)
+  , null_values = rse_fun_inv(c(0))
+  , trans = "rse_fun"
+  , alternative = "two_sided"
+  , log_yaxis = FALSE
+  , cut_logyaxis = 0.05
+  , xlab = "Relative survival effect (1 - HR%)"
+  , xlim = rse_fun_inv(c(-30, 60))
+  , together = FALSE
+  , plot_p_limit = 1 - 0.999
+  , plot_counternull = TRUE
+  , inverted = TRUE
+  , title = "Figure 1 in Bender et al. (2005)"
+  , x_scale = "default"
+)
+
+rm(rse_fun, rse_fun_inv)
+
+
+## ----rse_cdf, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+# Define the transformation function and its inverse for the relative survival effect
+
+rse_fun <- function(x){
+  100*(1 - exp(-x))
+}
+
+rse_fun_inv <- function(x){
+  log(-(100)/(x - 100))
+}
+
+res <- conf_dist(
+  estimate = c(-log(0.72))
+  , stderr = (0.187618)
+  , type = "coxreg"
+  , plot_type = "cdf"
+  , n_values = 1e4L
+  , est_names = c("RSE")
+  , conf_level = c(0.95, 0.883, 0.5)
+  , null_values = rse_fun_inv(c(0))
+  , trans = "rse_fun"
+  , alternative = "two_sided"
+  , log_yaxis = FALSE
+  , cut_logyaxis = 0.05
+  , xlab = "Relative survival effect (1 - HR%)"
+  , together = FALSE
+  , xlim = rse_fun_inv(c(-3, 60))
+  , plot_p_limit = 1 - 0.999
+  , plot_counternull = TRUE
+  , inverted = TRUE
+  , title = "Figure 2 in Bender et al. (2005)"
+)
+
+rm(rse_fun, rse_fun_inv)
+
 
 ## ----session_info, include=TRUE, echo=FALSE------------------------------
 sessionInfo()
