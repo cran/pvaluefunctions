@@ -1,4 +1,4 @@
-## ----setup, include = FALSE, echo = FALSE--------------------------------
+## ----setup, include = FALSE, echo = FALSE-------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE
   , comment = "#>"
@@ -45,7 +45,9 @@ res <- conf_dist(
   , plot_p_limit = 1 - 0.999
   , plot_counternull = TRUE
   , x_scale = "line"
+  , plot = TRUE
 )
+
 
 ## ----linreg_single_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
 #-----------------------------------------------------------------------------
@@ -79,6 +81,7 @@ res <- conf_dist(
   , together = FALSE
   , plot_p_limit = 1 - 0.999
   , plot_counternull = FALSE
+  , plot = TRUE
 )
 
 ## ----linreg_single_cdf, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
@@ -408,6 +411,6 @@ res <- conf_dist(
 rm(rse_fun, rse_fun_inv)
 
 
-## ----session_info, include=TRUE, echo=FALSE------------------------------
+## ----session_info, include=TRUE, echo=FALSE-----------------------------------
 sessionInfo()
 
