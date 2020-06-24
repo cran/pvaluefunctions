@@ -10,7 +10,7 @@ if (getRversion() >= "2.15.1") {
 
 #' Create and Plot \emph{P}-Value Functions, S-Value Functions, Confidence Distributions and Confidence Densities
 #'
-#' The function \code{conf_dist} generates confidence distributions (cdf), confidence densities (pdf), Shannon suprisal (s-value) functions and \emph{p}-value functions for several commonly used estimates. In addition, counternulls (see Rosenthal et al. 1994) and point estimates are calculated.
+#' The function \code{conf_dist} generates confidence distributions (cdf), confidence densities (pdf), Shannon suprisal (s-value) functions and \emph{p}-value functions for several commonly used estimates. In addition, counternulls (see Rosenthal et al. 1994), point estimates and the area under the confidence curve (AUCC) are calculated.
 #'
 #' \emph{P}-value functions and confidence intervals are calculated based on the \emph{t}-distribution for \emph{t}-tests, linear regression coefficients, and gamma regression models (GLM). The normal distribution is used for logistic regression, poisson regression and cox regression models. For correlation coefficients, Fisher's transform is used using the corresponding variances (see Bonett et al. 2000). \emph{P}-value functions and confidence intervals for variances are constructed using the Chi2 distribution. Finally, Wilson's score intervals are used for one proportion. For differences of proportions, the Wilson score interval with continuity correction is used (Newcombe 1998).
 #'
@@ -31,6 +31,9 @@ if (getRversion() >= "2.15.1") {
 #' @param cut_logyaxis Numerical value indicating the threshold below which the y-axis will be displayed logarithmically. Must lie between 0 and 1.
 #' @param xlim (optional) Optional numerical vector of length 2 (x1, x2) indicating the limits of the x-axis on the \emph{untransformed} scale if \code{trans} is not \code{identity}. The scale of the x-axis set by \code{x_scale} does not affect the x limits. For example: If you want to plot \emph{p}-value functions for odds ratios from logistic regressions, the limits have to be given on the log-odds scale if \code{trans = "exp"}. Note that x1 > x2 is allowed but then x2 will be the left limit and x1 the right limit (i.e. the limits are sorted before plotting). Null values (specified in \code{null_values}) that are outside of the specified limits are ignored and a message is printed.
 #' @param together Logical. Indicating if graphics for multiple estimates should be displayed together or on separate plots.
+#' @param plot_legend Logical. Indicating if a legend should be plotted if multiple curves are plotted together with different colors (i.e. \code{together = TRUE)} and \code{same_color = FALSE}).
+#' @param same_color Logical. Indicating if curves should be distinguished using colors if they are plotted together (i.e. \code{together = TRUE}).
+#' @param col String indicating the colour of the curves. Only relevant for single curves, multiple curves not plotted together (i.e. \code{together = FALSE}) and multiple curves plotted together but with the option \code{same_color} set to \code{TRUE}.
 #' @param nrow (optional) Integer greater than 0 indicating the number of rows when \code{together = FALSE} is specified for multiple estimates. Used in \code{facet_wrap} in ggplot2.
 #' @param ncol (optional) Integer greater than 0 indicating the number of columns when \code{together = FALSE} is specified for multiple estimates. Used in \code{facet_wrap} in ggplot2.
 #' @param plot_p_limit Numerical value indicating the lower limit of the y-axis. Must be greater than 0 for a logarithmic scale (i.e. \code{log_yaxis = TRUE}). The default is to omit plotting \emph{p}-values smaller than 1 - 0.999 = 0.001.
@@ -43,8 +46,10 @@ if (getRversion() >= "2.15.1") {
 #' @param x_scale String indicating the scaling of the x-axis. The default is to scale the x-axis logarithmically if the transformation specified in \code{trans} is "exp" (exponential) and linearly otherwise. The option \code{linear} (can be abbreviated) forces a linear scaling and the option \code{logarithm} (can be abbreviated) forces a logarithmic scaling, regardless what has been specified in \code{trans}.
 #' @param plot Logical. Should a plot be created (\code{TRUE}, the default) or not (\code{FALSE}). \code{FALSE} can be useful if users want to create their own plots using the returned data from the function. If \code{FALSE}, no ggplot2 object is returned.
 
-#' @return \code{conf_dist} returns four data frames and if \code{plot = TRUE} was specified, a ggplot2-plot object: \code{res_frame} (contains parameter values (e.g. mean differences, odds ratios etc.), \emph{p}-values (one- and two-sided), s-values, confidence distributions and densities, variable names and type of hypothesis), \code{conf_frame} (contains the specified confidence level(s) and the corresponding lower and upper limits as well as the corresponding variable name), \code{counternull_frame} (contains the counternull and the corresponding null values), \code{point_est} (contains the mean, median and mode point estimates) and if \code{plot = TRUE} was specified, \code{plot} (a ggplot2 object).
+#' @return \code{conf_dist} returns four data frames and if \code{plot = TRUE} was specified, a ggplot2-plot object: \code{res_frame} (contains parameter values (e.g. mean differences, odds ratios etc.), \emph{p}-values (one- and two-sided), s-values, confidence distributions and densities, variable names and type of hypothesis), \code{conf_frame} (contains the specified confidence level(s) and the corresponding lower and upper limits as well as the corresponding variable name), \code{counternull_frame} (contains the counternull and the corresponding null values), \code{point_est} (contains the mean, median and mode point estimates) and if \code{plot = TRUE} was specified, \code{aucc_frame} contains the estimated AUCC (area under the confidence curves) calculated by trapezoidal integration on the untransformed scale, \code{plot} (a ggplot2 object).
 #' @references Bender R, Berg G, Zeeb H. Tutorial: using confidence curves in medical research. \emph{Biom J.} 2005;47(2):237-247.
+#'
+#' Berrar D. Confidence curves: an alternative to null hypothesis significance testing for the comparison of classifiers. \emph{Mach Learn.} 2017;106:911-949.
 #'
 #' Bonett DG, Wright TA. Sample size requirements for estimating Pearson, Kendall and Spearman correlations. \emph{Psychometrika.} 2000;65(1):23-28.
 #'
@@ -178,6 +183,7 @@ if (getRversion() >= "2.15.1") {
 #'   , cut_logyaxis = 0.05
 #'   , xlab = "Difference between proportions"
 #'   , together = FALSE
+#'   , col = "#A52A2A" # Color curve in auburn
 #'   , plot_p_limit = 1 - 0.9999
 #'   , plot_counternull = FALSE
 #'   , title = NULL
@@ -275,8 +281,6 @@ if (getRversion() >= "2.15.1") {
 #'   , plot = TRUE
 #' )
 #'
-#' @seealso \code{\link[concurve]{ggconcurve}}
-#'
 #' @import stats ggplot2 scales
 #' @importFrom grDevices grey
 #' @importFrom utils find
@@ -301,6 +305,9 @@ conf_dist <- function(
   , xlab = NULL
   , xlim = NULL
   , together = FALSE
+  , plot_legend = TRUE
+  , same_color = FALSE
+  , col = "black"
   , nrow = NULL
   , ncol = NULL
   , plot_p_limit = (1 - 0.999)
@@ -347,7 +354,7 @@ conf_dist <- function(
 
   if (is.null(estimate)) {stop("Please provide an estimate.")}
 
-  # if (length(type) == 0L) {stop("Please provide the type of the estimate(s).")}
+  if (length(type) == 0L) {stop("Please provide the type of the estimate(s).")}
 
   if (!alternative %in% c("one_sided", "two_sided")) {stop("Alternative must be either \"two_sided\" or \"one_sided\".")}
 
@@ -504,6 +511,11 @@ conf_dist <- function(
     x_scale <- "log"
   }
 
+  if (length(col) > 1) {
+    warning(paste0("Only first color is used: ", col[1]))
+    col <- col[1]
+  }
+
   #-----------------------------------------------------------------------------
   # Calculate the confidence distributions/densities and p-value curves
   #-----------------------------------------------------------------------------
@@ -626,6 +638,33 @@ conf_dist <- function(
     if (!is.null(null_values)) {
       res$counternull_frame$variable <- factor(res$counternull_frame$variable, labels = est_names)
     }
+  }
+
+  #-----------------------------------------------------------------------------
+  # Calculate AUCC (area under the confidence curve), see Berrar (2017) Mach Learn 106:911-494
+  #-----------------------------------------------------------------------------
+
+  res$aucc_frame <- data.frame(
+    variable = est_names
+    , aucc = NA
+  )
+
+  for(i in seq_along(estimate)) {
+
+    x_tmp <- res$res_frame$values[res$res_frame$variable %in% est_names[i]]
+    y_tmp <- res$res_frame$p_two[res$res_frame$variable %in% est_names[i]]
+
+    nona_ind <- which(!is.na(y_tmp) & !is.na(x_tmp))
+
+    order_tmp <- order(res$res_frame$values[res$res_frame$variable %in% est_names[i]][nona_ind], decreasing = FALSE)
+
+    res$aucc_frame$aucc[res$aucc_frame$variable %in% est_names[i]] <- pracma::trapz(
+      x = x_tmp[nona_ind][order_tmp]
+      , y = y_tmp[nona_ind][order_tmp]
+    )
+
+    rm(x_tmp, y_tmp, nona_ind, order_tmp)
+
   }
 
   #-----------------------------------------------------------------------------
@@ -859,8 +898,6 @@ conf_dist <- function(
   # Plot using ggplot2
   #-----------------------------------------------------------------------------
 
-
-
   # Create custom y-axis scale (mixed linear and logarithmic)
 
   # Transform cutoff for log-y-axis if applicable
@@ -932,29 +969,38 @@ conf_dist <- function(
 
   p <- ggplot(res$res_frame, aes(x = values, y = eval(parse(text = y_var)), group = variable))
 
-  # If 2 or more estimates are plotted together, differentiate them by color
+  # If 2 or more estimates are plotted together, differentiate them by color (if user did not specify "same_color = TRUE")
 
-  if ((length(estimate) >= 2) & isTRUE(together)) {
+  if ((length(estimate) >= 2) & isTRUE(together) & isFALSE(same_color)) {
     p <- p + aes(colour = variable)
   }
 
   # For only one one-sided p-value curve, set the colors to black and blue
 
-  if (alternative %in% "one_sided" & (isFALSE(together) | (isTRUE(together) & length(estimate) < 2))) {
+  if (alternative %in% "one_sided" & (isFALSE(together) | (isTRUE(together) & length(estimate) < 2)) & isFALSE(same_color)) {
     p <- p + geom_line(aes(colour = hypothesis), size = 1.5) +
       scale_colour_manual(values = c("black", "#08A9CF"))  +
       theme(
         legend.position="none"
       )
 
+  } else if (alternative %in% "one_sided" & (isFALSE(together) | (isTRUE(together) & length(estimate) < 2)) & isTRUE(same_color)) {
+
+    p <- p + geom_line(aes(colour = hypothesis), size = 1.5) +
+      scale_colour_manual(values = c(col, col))  +
+      theme(
+        legend.position="none"
+      )
+
     # For only one two-sided p-value curve, set the color to black
 
-  } else if (alternative %in% "two_sided" & (isFALSE(together) | (isTRUE(together) & length(estimate) < 2))) {
-    p <- p + geom_line(size = 1.5, colour = "black")
+  } else if (alternative %in% "two_sided" & (isFALSE(together) | (isTRUE(together) & length(estimate) < 2) | (isTRUE(together) & isTRUE(same_color)))) {
+    p <- p + geom_line(size = 1.5, colour = col)
 
     # For 2 or more estimates plotted together: set the colors according to "Set1" palette
 
-  } else if (isTRUE(together) & (length(estimate) >= 2)) {
+  } else if ((alternative %in% "two_sided" & (length(estimate) >= 2) & isTRUE(together) & isFALSE(same_color) & isTRUE(plot_legend)) |
+             (alternative %in% "one_sided" & (length(estimate) >= 2) & isTRUE(together) & isTRUE(plot_legend))) { # Plot legend
     p <- p + geom_line(size = 1.5) +
       scale_colour_brewer(palette = "Set1", name = "") +
       theme(
@@ -962,6 +1008,15 @@ conf_dist <- function(
         , legend.text=element_text(size=15)
         , legend.title=element_text(size=15)
       )
+
+  } else if((alternative %in% "two_sided" & (length(estimate) >= 2) & isTRUE(together) & isFALSE(same_color) & isFALSE(plot_legend)) |
+            (alternative %in% "one_sided" & (length(estimate) >= 2) & isTRUE(together) & isFALSE(plot_legend))) { # Plot no legend
+    p <- p + geom_line(size = 1.5) +
+      scale_colour_brewer(palette = "Set1", name = "") +
+      theme(
+        legend.position="none"
+      )
+
   }
 
   # Add the labels for the axes
@@ -1169,7 +1224,7 @@ conf_dist <- function(
 
       # Print a message that shows which null values were outside of the x-axis limits.
 
-      message(paste0("The following null values are outside of the specified x-axis range (xlim) and are not shown: ", paste(res$counternull_frame$null_value[null_outside_plot], collapse = ", ")))
+      message(paste0("The following null values are outside of the specified x-axis range (xlim) and are not shown: ", paste(unique(res$counternull_frame$null_value[null_outside_plot]), collapse = ", ")))
 
       if ((length(null_outside_plot) < length(null_values))) { # There are some null-values to plot
 
@@ -1285,14 +1340,18 @@ conf_dist <- function(
 
   if (!is.null(null_values) && isTRUE(plot_counternull) && (plot_type %in% c("p_val", "s_val")) && !all(is.na(res$res_frame$counternull))) {
 
-    if (isTRUE(together) & (length(estimate) >= 2)) {
+    if (isTRUE(together) & (length(estimate) >= 2) & isFALSE(same_color)) {
 
       p <- p + geom_point(aes(x = values, y = counternull, colour = variable), size = 4, pch = 21, fill = "white", stroke = 1.7) +
         guides(colour = guide_legend(override.aes = list(pch = NA)))
 
+    } else if (isTRUE(together) & (length(estimate) >= 2) & isTRUE(same_color)) {
+
+      p <- p + geom_point(aes(x = values, y = counternull), colour = col, size = 4, pch = 21, fill = "white", stroke = 1.7)
+
     } else if (isFALSE(together) | (isTRUE(together) & (length(estimate) < 2))) {
 
-      p <- p + geom_point(aes(x = values, y = counternull), colour = "black", size = 4, pch = 21, fill = "white", stroke = 1.7)
+      p <- p + geom_point(aes(x = values, y = counternull), colour = col, size = 4, pch = 21, fill = "white", stroke = 1.7)
 
     }
   }
@@ -1324,11 +1383,20 @@ conf_dist <- function(
     p <- p + ggtitle(title)
   }
 
-  # Only print and return the plot object if requested
+  #-----------------------------------------------------------------------------
+  # Only print and return the ggplot2-object if requested
+  #-----------------------------------------------------------------------------
+
   if (isTRUE(plot)) {
     res$plot <- p
     suppressWarnings(print(p))
   }
+
+  #-----------------------------------------------------------------------------
+  # Sort the data frame for convenience
+  #-----------------------------------------------------------------------------
+
+  res$res_frame <- res$res_frame[order(res$res_frame$values), ]
 
   return(res)
 

@@ -23,6 +23,9 @@ conf_dist(
   xlab = NULL,
   xlim = NULL,
   together = FALSE,
+  plot_legend = TRUE,
+  same_color = FALSE,
+  col = "black",
   nrow = NULL,
   ncol = NULL,
   plot_p_limit = (1 - 0.999),
@@ -72,6 +75,12 @@ conf_dist(
 
 \item{together}{Logical. Indicating if graphics for multiple estimates should be displayed together or on separate plots.}
 
+\item{plot_legend}{Logical. Indicating if a legend should be plotted if multiple curves are plotted together with different colors (i.e. \code{together = TRUE)} and \code{same_color = FALSE}).}
+
+\item{same_color}{Logical. Indicating if curves should be distinguished using colors if they are plotted together (i.e. \code{together = TRUE}).}
+
+\item{col}{String indicating the colour of the curves. Only relevant for single curves, multiple curves not plotted together (i.e. \code{together = FALSE}) and multiple curves plotted together but with the option \code{same_color} set to \code{TRUE}.}
+
 \item{nrow}{(optional) Integer greater than 0 indicating the number of rows when \code{together = FALSE} is specified for multiple estimates. Used in \code{facet_wrap} in ggplot2.}
 
 \item{ncol}{(optional) Integer greater than 0 indicating the number of columns when \code{together = FALSE} is specified for multiple estimates. Used in \code{facet_wrap} in ggplot2.}
@@ -93,10 +102,10 @@ conf_dist(
 \item{plot}{Logical. Should a plot be created (\code{TRUE}, the default) or not (\code{FALSE}). \code{FALSE} can be useful if users want to create their own plots using the returned data from the function. If \code{FALSE}, no ggplot2 object is returned.}
 }
 \value{
-\code{conf_dist} returns four data frames and if \code{plot = TRUE} was specified, a ggplot2-plot object: \code{res_frame} (contains parameter values (e.g. mean differences, odds ratios etc.), \emph{p}-values (one- and two-sided), s-values, confidence distributions and densities, variable names and type of hypothesis), \code{conf_frame} (contains the specified confidence level(s) and the corresponding lower and upper limits as well as the corresponding variable name), \code{counternull_frame} (contains the counternull and the corresponding null values), \code{point_est} (contains the mean, median and mode point estimates) and if \code{plot = TRUE} was specified, \code{plot} (a ggplot2 object).
+\code{conf_dist} returns four data frames and if \code{plot = TRUE} was specified, a ggplot2-plot object: \code{res_frame} (contains parameter values (e.g. mean differences, odds ratios etc.), \emph{p}-values (one- and two-sided), s-values, confidence distributions and densities, variable names and type of hypothesis), \code{conf_frame} (contains the specified confidence level(s) and the corresponding lower and upper limits as well as the corresponding variable name), \code{counternull_frame} (contains the counternull and the corresponding null values), \code{point_est} (contains the mean, median and mode point estimates) and if \code{plot = TRUE} was specified, \code{aucc_frame} contains the estimated AUCC (area under the confidence curves) calculated by trapezoidal integration on the untransformed scale, \code{plot} (a ggplot2 object).
 }
 \description{
-The function \code{conf_dist} generates confidence distributions (cdf), confidence densities (pdf), Shannon suprisal (s-value) functions and \emph{p}-value functions for several commonly used estimates. In addition, counternulls (see Rosenthal et al. 1994) and point estimates are calculated.
+The function \code{conf_dist} generates confidence distributions (cdf), confidence densities (pdf), Shannon suprisal (s-value) functions and \emph{p}-value functions for several commonly used estimates. In addition, counternulls (see Rosenthal et al. 1994), point estimates and the area under the confidence curve (AUCC) are calculated.
 }
 \details{
 \emph{P}-value functions and confidence intervals are calculated based on the \emph{t}-distribution for \emph{t}-tests, linear regression coefficients, and gamma regression models (GLM). The normal distribution is used for logistic regression, poisson regression and cox regression models. For correlation coefficients, Fisher's transform is used using the corresponding variances (see Bonett et al. 2000). \emph{P}-value functions and confidence intervals for variances are constructed using the Chi2 distribution. Finally, Wilson's score intervals are used for one proportion. For differences of proportions, the Wilson score interval with continuity correction is used (Newcombe 1998).
@@ -213,6 +222,7 @@ res <- conf_dist(
   , cut_logyaxis = 0.05
   , xlab = "Difference between proportions"
   , together = FALSE
+  , col = "#A52A2A" # Color curve in auburn
   , plot_p_limit = 1 - 0.9999
   , plot_counternull = FALSE
   , title = NULL
@@ -314,6 +324,8 @@ res <- conf_dist(
 \references{
 Bender R, Berg G, Zeeb H. Tutorial: using confidence curves in medical research. \emph{Biom J.} 2005;47(2):237-247.
 
+Berrar D. Confidence curves: an alternative to null hypothesis significance testing for the comparison of classifiers. \emph{Mach Learn.} 2017;106:911-949.
+
 Bonett DG, Wright TA. Sample size requirements for estimating Pearson, Kendall and Spearman correlations. \emph{Psychometrika.} 2000;65(1):23-28.
 
 Infanger D, Schmidt-Trucksäss A. \emph{P} value functions: An underused method to present research results and to promote quantitative reasoning. \emph{Stat Med.} 2019;38:4189-4197.
@@ -333,7 +345,4 @@ Schweder T, Hjort NL. Confidence, likelihood, probability: statistical inference
 Sullivan KM, Foster DA. Use of the confidence interval function. \emph{Epidemiology.} 1990;1(1):39-42.
 
 Xie Mg, Singh K. Confidence distribution, the frequentist distribution estimator of a parameter: A review. \emph{Internat Statist Rev.} 2013;81(1):3-39.
-}
-\seealso{
-\code{\link[concurve]{ggconcurve}}
 }

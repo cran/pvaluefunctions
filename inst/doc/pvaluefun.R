@@ -102,6 +102,7 @@ res <- conf_dist(
   , xlab = "Coefficient Agriculture"
   , xlim = c(-0.12, 0.065)
   , together = FALSE
+  , col = "#08A9CF"
   # , plot_p_limit = 1 - 0.999
   , plot_counternull = FALSE
 )
@@ -123,6 +124,7 @@ res <- conf_dist(
   , cut_logyaxis = 0.05
   , xlab = "Regression coefficients"
   , together = TRUE
+  , same_color = FALSE
   , plot_p_limit = 1 - 0.999
   , plot_counternull = FALSE
   , inverted = FALSE
@@ -180,19 +182,6 @@ res <- conf_dist(
 )
 
 ## ----logreg, message = FALSE, warning = FALSE, fig.width = 10.0, fig.height = 7.2, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
-#-----------------------------------------------------------------------------
-# Calculate logistic regression model using a dataset from UCLA
-#-----------------------------------------------------------------------------
-
-dat_tmp <- read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
-
-dat_tmp$rank <- factor(dat_tmp$rank)
-logistic_mod <- glm(admit ~ gre + gpa + rank, data = dat_tmp, family = "binomial")
-
-summary(logistic_mod)
-
-rm(dat_tmp)
-
 #-----------------------------------------------------------------------------
 # Create p-value function
 #-----------------------------------------------------------------------------
@@ -410,6 +399,34 @@ res <- conf_dist(
 
 rm(rse_fun, rse_fun_inv)
 
+
+## ----aucc_comparison, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+
+# Lungcancer dataset from the "meta" package
+
+res <- conf_dist(
+  estimate = c(2.512, 2.298, 2.455, 2.255, 2.989, 1.59, 2.674) # Log-incidence rate ratio (IRR)
+  , stderr = c(0.087, 0.127, 0.144, 0.153, 0.265, 0.318, 0.584) # Standard errors of the log-IRR
+  , type = "general_z"
+  , plot_type = "p_val"
+  , n_values = 1e4L
+  , est_names = c("U.S. Veterans", "Men in 9 States", "Canadian Veterans", "Men in 25 States", "British Doctors", "California Legion", "California Occupational") # Study names
+  , conf_level = c(0.95)
+  , null_values = c(log(1))
+  , trans = "exp"
+  , alternative = "two_sided"
+  , xlab = "Incidence rate ratio (IRR)"
+  , xlim = c(log(0.95), log(50))
+  , together = TRUE
+  , same_color = TRUE
+  , col = "#C977A2"
+  , plot_p_limit = 1 - 0.9999
+  , plot_counternull = FALSE
+  , inverted = FALSE
+)
+
+# Print the AUCCs
+print(res$aucc_frame, row.names = FALSE)
 
 ## ----session_info, include=TRUE, echo=FALSE-----------------------------------
 sessionInfo()
