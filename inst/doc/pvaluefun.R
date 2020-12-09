@@ -14,7 +14,7 @@ library(pvaluefunctions)
 #  source_url("https://raw.githubusercontent.com/DInfanger/pvaluefunctions/master/R/confidence_distributions.R")
 #  
 
-## ----ttest, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----ttest, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200----
 #-----------------------------------------------------------------------------
 # T-Test
 #-----------------------------------------------------------------------------
@@ -49,7 +49,7 @@ res <- conf_dist(
 )
 
 
-## ----linreg_single_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----linreg_single_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200----
 #-----------------------------------------------------------------------------
 # Model
 #-----------------------------------------------------------------------------
@@ -84,7 +84,7 @@ res <- conf_dist(
   , plot = TRUE
 )
 
-## ----linreg_single_cdf, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----linreg_single_cdf, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200----
 res <- conf_dist(
   estimate = c(-0.02143)
   , df = c(43)
@@ -107,7 +107,7 @@ res <- conf_dist(
   , plot_counternull = FALSE
 )
 
-## ----linreg_multiple_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----linreg_multiple_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200----
 res <- conf_dist(
   estimate = c(0.13115, 0.04913)
   , df = c(43, 43)
@@ -130,7 +130,7 @@ res <- conf_dist(
   , inverted = FALSE
 )
 
-## ----linreg_multiple_sval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----linreg_multiple_sval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200----
 res <- conf_dist(
   estimate = c(0.13115, 0.04913)
   , df = c(43, 43)
@@ -151,7 +151,7 @@ res <- conf_dist(
   , plot_counternull = TRUE
 )
 
-## ----corr_pearson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----corr_pearson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200----
 #-----------------------------------------------------------------------------
 # Calculate Pearson's correlation coefficient
 #-----------------------------------------------------------------------------
@@ -181,7 +181,7 @@ res <- conf_dist(
   , plot_counternull = FALSE
 )
 
-## ----logreg, message = FALSE, warning = FALSE, fig.width = 10.0, fig.height = 7.2, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----logreg, message = FALSE, warning = FALSE, fig.width = 10.0, fig.height = 7.2, out.width = "80%", fig.align='center', dev = "png", dpi = 200----
 #-----------------------------------------------------------------------------
 # Create p-value function
 #-----------------------------------------------------------------------------
@@ -207,7 +207,7 @@ res <- conf_dist(
   , x_scale = "default"
 )
 
-## ----prop, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----prop, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200----
 res <- conf_dist(
   estimate = c(0.44)
   , n = c(50)
@@ -229,7 +229,7 @@ res <- conf_dist(
   , x_scale = "default"
 )
 
-## ----propdiff_Wilson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----propdiff_Wilson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200----
 res <- conf_dist(
   estimate = c(68/100, 98/150)
   , n = c(100, 150)
@@ -248,7 +248,7 @@ res <- conf_dist(
   , plot_counternull = FALSE
 )
 
-## ----propdiff_agresticaffo, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----propdiff_agresticaffo, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200----
 
 # First proportion
 
@@ -295,7 +295,7 @@ res <- conf_dist(
 )
 
 
-## ----variance_calcs, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', eval = TRUE, echo = TRUE, fig.show = "hide", dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----variance_calcs, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', eval = TRUE, echo = TRUE, fig.show = "hide", dev = "png", dpi = 200----
 # Simulate some data from a normal distribution
 
 set.seed(142857)
@@ -322,12 +322,12 @@ res <- conf_dist(
 )
 
 
-## ----variance_plot, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', eval = TRUE, echo = TRUE, dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----variance_plot, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', eval = TRUE, echo = TRUE, dev = "png", dpi = 200----
 # Add vertical lines at the point estimates (mode, median, mean)
 
 res$plot + ggplot2::geom_vline(xintercept = as.numeric(res$point_est[1, 1:3]), linetype = 2, size = 1)
 
-## ----rse_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----rse_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200----
 # Define the transformation function and its inverse for the relative survival effect
 
 rse_fun <- function(x){
@@ -364,7 +364,7 @@ res <- conf_dist(
 rm(rse_fun, rse_fun_inv)
 
 
-## ----rse_cdf, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----rse_cdf, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200----
 # Define the transformation function and its inverse for the relative survival effect
 
 rse_fun <- function(x){
@@ -400,7 +400,7 @@ res <- conf_dist(
 rm(rse_fun, rse_fun_inv)
 
 
-## ----aucc_comparison, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dev.args = list(type = "cairo-png"), dpi = 200----
+## ----aucc_comparison, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200----
 
 # Lungcancer dataset from the "meta" package
 

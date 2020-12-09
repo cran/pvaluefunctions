@@ -1,7 +1,7 @@
 ---
 title: "*P*-value functions: Tutorial using the `pvaluefunctions` package"
 author: "Denis Infanger"
-date: "`r Sys.Date()`"
+date: "2020-12-08"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{P-value functions}
@@ -9,12 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r setup, include = FALSE, echo = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE
-  , comment = "#>"
-)
-```
+
 
 ## Accompanying paper
 
@@ -34,7 +29,8 @@ This vignette shows how to use the `pvaluefunctions` package wich contains an R 
 
 Install (`install.packages("pvaluefunctions")`) and load the package from CRAN.
 
-```{r load_package, message = FALSE, warning = FALSE, echo = TRUE, eval = TRUE}
+
+```r
 library(pvaluefunctions)
 ```
 
@@ -44,13 +40,7 @@ library(pvaluefunctions)
 
 <!-- Alternatively, you can source the files directly from the GitHub repository using the [`devtools`](https://CRAN.R-project.org/package=devtools) package: -->
 
-```{r source_github, message = FALSE, warning = FALSE, echo = FALSE, eval = FALSE}
-library(devtools)
 
-# Load function
-source_url("https://raw.githubusercontent.com/DInfanger/pvaluefunctions/master/R/confidence_distributions.R")
-
-```
 
 ## Dependencies
 
@@ -119,13 +109,26 @@ The main function `conf_dist()` returns five objects in a list:
 
 ### Two-sample *t*-test with unequal variances (Welch-Test)
 
-```{r ttest, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
+
+```r
 #-----------------------------------------------------------------------------
 # T-Test
 #-----------------------------------------------------------------------------
 
 with(sleep, mean(extra[group == 1])) - with(sleep, mean(extra[group == 2]))
+#> [1] -1.58
 t.test(extra ~ group, data = sleep, var.equal = FALSE)
+#> 
+#> 	Welch Two Sample t-test
+#> 
+#> data:  extra by group
+#> t = -1.8608, df = 17.776, p-value = 0.07939
+#> alternative hypothesis: true difference in means between group 1 and group 2 is not equal to 0
+#> 95 percent confidence interval:
+#>  -3.3654832  0.2054832
+#> sample estimates:
+#> mean in group 1 mean in group 2 
+#>            0.75            2.33
 
 #-----------------------------------------------------------------------------
 # Create p-value function
@@ -152,8 +155,9 @@ res <- conf_dist(
   , x_scale = "line"
   , plot = TRUE
 )
-
 ```
+
+<img src="figure/ttest-1.png" title="plot of chunk ttest" alt="plot of chunk ttest" width="80%" style="display: block; margin: auto;" />
 
 ### Single coefficient from a linear regression model
 #### *P*-value function
@@ -161,7 +165,8 @@ res <- conf_dist(
 Because it's difficult to see very small *p*-values in the graph, you can set the option `log_yaxis = TRUE` so that *p*-values (i.e. the y-axes) below the value set in `cut_logyaxis` will be plotted on a logarithmic scale. This will make it much easier to see small *p*-values but has the disadvantage of creating a "kink" in the *p*-value function which is a pure artifact and puts an undue emphasis on the specified cutoff.
 
 
-```{r linreg_single_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
+
+```r
 #-----------------------------------------------------------------------------
 # Model
 #-----------------------------------------------------------------------------
@@ -169,6 +174,27 @@ Because it's difficult to see very small *p*-values in the graph, you can set th
 mod <- lm(Infant.Mortality~Agriculture + Fertility + Examination, data = swiss)
 
 summary(mod)
+#> 
+#> Call:
+#> lm(formula = Infant.Mortality ~ Agriculture + Fertility + Examination, 
+#>     data = swiss)
+#> 
+#> Residuals:
+#>     Min      1Q  Median      3Q     Max 
+#> -8.5375 -1.4021 -0.0066  1.7381  5.9150 
+#> 
+#> Coefficients:
+#>             Estimate Std. Error t value Pr(>|t|)   
+#> (Intercept) 11.01896    4.47291   2.463  0.01784 * 
+#> Agriculture -0.02143    0.02394  -0.895  0.37569   
+#> Fertility    0.13115    0.04145   3.164  0.00285 **
+#> Examination  0.04913    0.08351   0.588  0.55942   
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> Residual standard error: 2.645 on 43 degrees of freedom
+#> Multiple R-squared:  0.2291,	Adjusted R-squared:  0.1753 
+#> F-statistic:  4.26 on 3 and 43 DF,  p-value: 0.01014
 
 #-----------------------------------------------------------------------------
 # Create p-value function
@@ -197,9 +223,12 @@ res <- conf_dist(
 )
 ```
 
+<img src="figure/linreg_single_pval-1.png" title="plot of chunk linreg_single_pval" alt="plot of chunk linreg_single_pval" width="80%" style="display: block; margin: auto;" />
+
 #### Confidence distribution
 
-```{r linreg_single_cdf, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
+
+```r
 res <- conf_dist(
   estimate = c(-0.02143)
   , df = c(43)
@@ -223,12 +252,15 @@ res <- conf_dist(
 )
 ```
 
+<img src="figure/linreg_single_cdf-1.png" title="plot of chunk linreg_single_cdf" alt="plot of chunk linreg_single_cdf" width="80%" style="display: block; margin: auto;" />
+
 The point where the confidence distribution is $0.5$ is the median unbiased estimator (see Xie & Singh (2013) for a review and proofs). 
 
 ### Multiple coefficients from a linear regression model
 #### *P*-value functions
 
-```{r linreg_multiple_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
+
+```r
 res <- conf_dist(
   estimate = c(0.13115, 0.04913)
   , df = c(43, 43)
@@ -252,9 +284,12 @@ res <- conf_dist(
 )
 ```
 
+<img src="figure/linreg_multiple_pval-1.png" title="plot of chunk linreg_multiple_pval" alt="plot of chunk linreg_multiple_pval" width="80%" style="display: block; margin: auto;" />
+
 #### Surprisal values
 
-```{r linreg_multiple_sval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
+
+```r
 res <- conf_dist(
   estimate = c(0.13115, 0.04913)
   , df = c(43, 43)
@@ -276,14 +311,28 @@ res <- conf_dist(
 )
 ```
 
+<img src="figure/linreg_multiple_sval-1.png" title="plot of chunk linreg_multiple_sval" alt="plot of chunk linreg_multiple_sval" width="80%" style="display: block; margin: auto;" />
+
 ### Pearson correlation coefficient (one-sided)
 
-```{r corr_pearson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
+
+```r
 #-----------------------------------------------------------------------------
 # Calculate Pearson's correlation coefficient
 #-----------------------------------------------------------------------------
 
 cor.test(swiss$Fertility, swiss$Agriculture, alternative = "two.sided", method = "pearson")
+#> 
+#> 	Pearson's product-moment correlation
+#> 
+#> data:  swiss$Fertility and swiss$Agriculture
+#> t = 2.5316, df = 45, p-value = 0.01492
+#> alternative hypothesis: true correlation is not equal to 0
+#> 95 percent confidence interval:
+#>  0.07334947 0.58130587
+#> sample estimates:
+#>       cor 
+#> 0.3530792
 
 #-----------------------------------------------------------------------------
 # Create p-value function
@@ -309,9 +358,12 @@ res <- conf_dist(
 )
 ```
 
+<img src="figure/corr_pearson-1.png" title="plot of chunk corr_pearson" alt="plot of chunk corr_pearson" width="80%" style="display: block; margin: auto;" />
+
 ### Odds ratio from logistic regression
 
-```{r logreg, message = FALSE, warning = FALSE, fig.width = 10.0, fig.height = 7.2, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
+
+```r
 #-----------------------------------------------------------------------------
 # Create p-value function
 #-----------------------------------------------------------------------------
@@ -338,11 +390,14 @@ res <- conf_dist(
 )
 ```
 
+<img src="figure/logreg-1.png" title="plot of chunk logreg" alt="plot of chunk logreg" width="80%" style="display: block; margin: auto;" />
+
 ### Proportion
 
 The *p*-value function (and thus the confidence intervals) are based on Wilson's score interval and not the normal approximation. This means that the *p*-value function will never be outside the interval $[0, 1]$.
 
-```{r prop, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
+
+```r
 res <- conf_dist(
   estimate = c(0.44)
   , n = c(50)
@@ -363,11 +418,16 @@ res <- conf_dist(
   , plot_counternull = TRUE
   , x_scale = "default"
 )
+#> 
+#> Transformation changed to identity.
 ```
+
+<img src="figure/prop-1.png" title="plot of chunk prop" alt="plot of chunk prop" width="80%" style="display: block; margin: auto;" />
 
 ### Difference between two independent proportions: Wilson's score by Newcombe with continuity correction
 
-```{r propdiff_Wilson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
+
+```r
 res <- conf_dist(
   estimate = c(68/100, 98/150)
   , n = c(100, 150)
@@ -387,11 +447,14 @@ res <- conf_dist(
 )
 ```
 
+<img src="figure/propdiff_Wilson-1.png" title="plot of chunk propdiff_Wilson" alt="plot of chunk propdiff_Wilson" width="80%" style="display: block; margin: auto;" />
+
 ### Difference between two independent proportions: Agresti-Caffo adjusted Wald interval
 
 The standard Wald interval can be modified in a simple manner to drastically improve its coverage probabilities. Simply add 1 to the number of successes and add 2 to the sample size for both proportions. Then proceed to calculate the Wald interval with these modified data. The point estimate for the difference between proportions is still calculated using the unmodified data. The function `conf_dist` does not have a dedicaded type for this kind of estimator but as the Wald interval is based on the normal distribution, we can use `type = general_z` to create the *p*-value function.
 
-```{r propdiff_agresticaffo, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
+
+```r
 
 # First proportion
 
@@ -436,14 +499,16 @@ res <- conf_dist(
   , plot_p_limit = 1 - 0.9999
   , plot_counternull = FALSE
 )
-
 ```
+
+<img src="figure/propdiff_agresticaffo-1.png" title="plot of chunk propdiff_agresticaffo" alt="plot of chunk propdiff_agresticaffo" width="80%" style="display: block; margin: auto;" />
 
 ### Confidence density of a variance estimate from a normal distribution
 
 The confidence density of a variance estimate is skewed. This means that the mean, mode and median of the confidence density will not be identical, in general.
 
-```{r variance_calcs, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', eval = TRUE, echo = TRUE, fig.show = "hide", dev = "png", dpi = 200}
+
+```r
 # Simulate some data from a normal distribution
 
 set.seed(142857)
@@ -468,20 +533,23 @@ res <- conf_dist(
   , plot_p_limit = 1 - 0.999
   , plot_counternull = TRUE
 )
-
 ```
 
-```{r variance_plot, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', eval = TRUE, echo = TRUE, dev = "png", dpi = 200}
+
+```r
 # Add vertical lines at the point estimates (mode, median, mean)
 
 res$plot + ggplot2::geom_vline(xintercept = as.numeric(res$point_est[1, 1:3]), linetype = 2, size = 1)
 ```
 
+<img src="figure/variance_plot-1.png" title="plot of chunk variance_plot" alt="plot of chunk variance_plot" width="80%" style="display: block; margin: auto;" />
+
 ### *P*-value function and confidence distribution for the relative survival effect (1 - HR%)
 
 Here, I'm going to replicate **Figure 1** and **Figure 2** in Bender et al. (2005). To do this, we first need to define the transformation that transforms the log-HR into the relative survival effect. By specifying `trans = rse_fun`, the values are automatically transformed and plotted. In addition, we will plot the *p*-value function inverted so that the cusp is located at the bottom. First the *p*-value function:
 
-```{r rse_pval, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
+
+```r
 # Define the transformation function and its inverse for the relative survival effect
 
 rse_fun <- function(x){
@@ -514,12 +582,17 @@ res <- conf_dist(
   , title = "Figure 1 in Bender et al. (2005)"
   , x_scale = "default"
 )
+```
+
+<img src="figure/rse_pval-1.png" title="plot of chunk rse_pval" alt="plot of chunk rse_pval" width="80%" style="display: block; margin: auto;" />
+
+```r
 
 rm(rse_fun, rse_fun_inv)
-
 ```
 Now the confidence distribution (Figure 2):
-```{r rse_cdf, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
+
+```r
 # Define the transformation function and its inverse for the relative survival effect
 
 rse_fun <- function(x){
@@ -551,16 +624,21 @@ res <- conf_dist(
   , inverted = TRUE
   , title = "Figure 2 in Bender et al. (2005)"
 )
+```
+
+<img src="figure/rse_cdf-1.png" title="plot of chunk rse_cdf" alt="plot of chunk rse_cdf" width="80%" style="display: block; margin: auto;" />
+
+```r
 
 rm(rse_fun, rse_fun_inv)
-
 ```
 
 
 ### Comparing the precision of multiple estimates using the AUCC (area under the confidence curve)
 The AUCC is a scalar representing the area under the *p*-value function (see Berrar (2017)). Values close to 0 indicate a high precision while larger values indicate poorer precision. Multiple estimates can be compared by their AUCC (in the context of a meta-analysis for example). The AUCC is calculated numerically using trapezoidal integration on the untransformed *p*-value function. The estimate can be quite poor if few x-values are used (i.e. argument `n_values` is low).
 
-```{r aucc_comparison, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
+
+```r
 
 # Lungcancer dataset from the "meta" package
 
@@ -584,9 +662,22 @@ res <- conf_dist(
   , plot_counternull = FALSE
   , inverted = FALSE
 )
+```
+
+<img src="figure/aucc_comparison-1.png" title="plot of chunk aucc_comparison" alt="plot of chunk aucc_comparison" width="80%" style="display: block; margin: auto;" />
+
+```r
 
 # Print the AUCCs
 print(res$aucc_frame, row.names = FALSE)
+#>                 variable      aucc
+#>            U.S. Veterans 0.1388319
+#>          Men in 9 States 0.2026627
+#>        Canadian Veterans 0.2297908
+#>         Men in 25 States 0.2441527
+#>          British Doctors 0.4228789
+#>        California Legion 0.5074546
+#>  California Occupational 0.9319293
 ```
 
 ## Similar packages
@@ -623,8 +714,39 @@ Xie Mg, Singh K. (2013): Confidence distribution, the frequentist distribution e
 
 ## Session info
 
-```{r session_info, include=TRUE, echo=FALSE}
-sessionInfo()
+
+```
+#> R Under development (unstable) (2020-12-07 r79587)
+#> Platform: x86_64-w64-mingw32/x64 (64-bit)
+#> Running under: Windows 10 x64 (build 19042)
+#> 
+#> Matrix products: default
+#> 
+#> locale:
+#> [1] LC_COLLATE=C                        LC_CTYPE=German_Switzerland.1252   
+#> [3] LC_MONETARY=German_Switzerland.1252 LC_NUMERIC=C                       
+#> [5] LC_TIME=German_Switzerland.1252    
+#> 
+#> attached base packages:
+#> [1] stats     graphics  grDevices utils     datasets  methods   base     
+#> 
+#> other attached packages:
+#> [1] pvaluefunctions_1.6.1
+#> 
+#> loaded via a namespace (and not attached):
+#>  [1] Rcpp_1.0.5         pracma_2.2.9       RColorBrewer_1.1-2 highr_0.8         
+#>  [5] pillar_1.4.7       compiler_4.1.0     prettyunits_1.1.1  tools_4.1.0       
+#>  [9] digest_0.6.27      testthat_3.0.0     pkgbuild_1.1.0     pkgload_1.1.0     
+#> [13] evaluate_0.14      lifecycle_0.2.0    tibble_3.0.4       gtable_0.3.0      
+#> [17] pkgconfig_2.0.3    rlang_0.4.9        cli_2.2.0          rstudioapi_0.13   
+#> [21] parallel_4.1.0     xfun_0.19          withr_2.3.0        stringr_1.4.0     
+#> [25] roxygen2_7.1.1     xml2_1.3.2         knitr_1.30         vctrs_0.3.5       
+#> [29] desc_1.2.0         rprojroot_2.0.2    grid_4.1.0         glue_1.4.2        
+#> [33] R6_2.5.0           processx_3.4.5     fansi_0.4.1        farver_2.0.3      
+#> [37] zipfR_0.6-70       callr_3.5.1        purrr_0.3.4        ggplot2_3.3.2     
+#> [41] magrittr_2.0.1     ellipsis_0.3.1     scales_1.1.1       ps_1.5.0          
+#> [45] assertthat_0.2.1   colorspace_2.0-0   stringi_1.5.3      munsell_0.5.0     
+#> [49] crayon_1.3.4
 ```
 
 <!-- ## License -->
