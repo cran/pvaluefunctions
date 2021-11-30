@@ -167,7 +167,7 @@ res <- conf_dist(
   , n = 47
   , type = "pearson"
   , plot_type = "p_val"
-  , n_values = 1e4L
+  , n_values = 1e3L
   # , est_names = c("")
   , conf_level = c(0.95, 0.90, 0.80)
   , null_values = c(0)

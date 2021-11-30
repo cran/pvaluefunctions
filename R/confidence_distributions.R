@@ -32,7 +32,7 @@ if (getRversion() >= "2.15.1") {
 #' @param xlim (optional) Optional numerical vector of length 2 (x1, x2) indicating the limits of the x-axis on the \emph{untransformed} scale if \code{trans} is not \code{identity}. The scale of the x-axis set by \code{x_scale} does not affect the x limits. For example: If you want to plot \emph{p}-value functions for odds ratios from logistic regressions, the limits have to be given on the log-odds scale if \code{trans = "exp"}. Note that x1 > x2 is allowed but then x2 will be the left limit and x1 the right limit (i.e. the limits are sorted before plotting). Null values (specified in \code{null_values}) that are outside of the specified limits are ignored and a message is printed.
 #' @param together Logical. Indicating if graphics for multiple estimates should be displayed together or on separate plots.
 #' @param plot_legend Logical. Indicating if a legend should be plotted if multiple curves are plotted together with different colors (i.e. \code{together = TRUE)} and \code{same_color = FALSE}).
-#' @param same_color Logical. Indicating if curves should be distinguished using colors if they are plotted together (i.e. \code{together = TRUE}).
+#' @param same_color Logical. Indicating if curves should be distinguished using colors if they are plotted together (i.e. \code{together = TRUE}). Setting this to FALSE also disables the default behavior that the two halves of the curves are plotted in different colors for a one-sided alternative.
 #' @param col String indicating the colour of the curves. Only relevant for single curves, multiple curves not plotted together (i.e. \code{together = FALSE}) and multiple curves plotted together but with the option \code{same_color} set to \code{TRUE}.
 #' @param nrow (optional) Integer greater than 0 indicating the number of rows when \code{together = FALSE} is specified for multiple estimates. Used in \code{facet_wrap} in ggplot2.
 #' @param ncol (optional) Integer greater than 0 indicating the number of columns when \code{together = FALSE} is specified for multiple estimates. Used in \code{facet_wrap} in ggplot2.
@@ -46,12 +46,14 @@ if (getRversion() >= "2.15.1") {
 #' @param x_scale String indicating the scaling of the x-axis. The default is to scale the x-axis logarithmically if the transformation specified in \code{trans} is "exp" (exponential) and linearly otherwise. The option \code{linear} (can be abbreviated) forces a linear scaling and the option \code{logarithm} (can be abbreviated) forces a logarithmic scaling, regardless what has been specified in \code{trans}.
 #' @param plot Logical. Should a plot be created (\code{TRUE}, the default) or not (\code{FALSE}). \code{FALSE} can be useful if users want to create their own plots using the returned data from the function. If \code{FALSE}, no ggplot2 object is returned.
 
-#' @return \code{conf_dist} returns four data frames and if \code{plot = TRUE} was specified, a ggplot2-plot object: \code{res_frame} (contains parameter values (e.g. mean differences, odds ratios etc.), \emph{p}-values (one- and two-sided), s-values, confidence distributions and densities, variable names and type of hypothesis), \code{conf_frame} (contains the specified confidence level(s) and the corresponding lower and upper limits as well as the corresponding variable name), \code{counternull_frame} (contains the counternull and the corresponding null values), \code{point_est} (contains the mean, median and mode point estimates) and if \code{plot = TRUE} was specified, \code{aucc_frame} contains the estimated AUCC (area under the confidence curves) calculated by trapezoidal integration on the untransformed scale, \code{plot} (a ggplot2 object).
+#' @return \code{conf_dist} returns four data frames and if \code{plot = TRUE} was specified, a ggplot2-plot object: \code{res_frame} (contains parameter values (e.g. mean differences, odds ratios etc.), \emph{p}-values (one- and two-sided), s-values, confidence distributions and densities, variable names and type of hypothesis), \code{conf_frame} (contains the specified confidence level(s) and the corresponding lower and upper limits as well as the corresponding variable name), \code{counternull_frame} (contains the counternull and the corresponding null values), \code{point_est} (contains the mean, median and mode point estimates) and if \code{plot = TRUE} was specified, \code{aucc_frame} contains the estimated AUCC (area under the confidence curve, see Berrar 2017) calculated by trapezoidal integration on the untransformed scale. Also provides the proportion of the aucc that lies above the null value(s) if they are provided. \code{plot} (a ggplot2 object).
 #' @references Bender R, Berg G, Zeeb H. Tutorial: using confidence curves in medical research. \emph{Biom J.} 2005;47(2):237-247.
 #'
 #' Berrar D. Confidence curves: an alternative to null hypothesis significance testing for the comparison of classifiers. \emph{Mach Learn.} 2017;106:911-949.
 #'
 #' Bonett DG, Wright TA. Sample size requirements for estimating Pearson, Kendall and Spearman correlations. \emph{Psychometrika.} 2000;65(1):23-28.
+#'
+#' Cole SR, Edwards JK, Greenland S. Surprise! \emph{Am J Epidemiol.} 2021:190(2):191-193.
 #'
 #' Infanger D, Schmidt-Trucksäss A. \emph{P} value functions: An underused method to present research results and to promote quantitative reasoning. \emph{Stat Med.} 2019;38:4189-4197.
 #'
@@ -60,6 +62,8 @@ if (getRversion() >= "2.15.1") {
 #' Poole C. Confidence intervals exclude nothing. \emph{Am J Public Health.} 1987;77(4):492-493.
 #'
 #' Poole C. Beyond the confidence interval. \emph{Am J Public Health.} 1987;77(2):195-199.
+#'
+#' Rafi Z, Greenland S. Semantic and cognitive tools to aid statistical science: replace confidence and significance by compatibility and surprise. \emph{BMC Med Res Methodol} 2020;20:244.
 #'
 #' Rosenthal R, Rubin D. The counternull value of an effect size: a new statistic. \emph{Psychological Science.} 1994;5(6):329-334.
 #'
@@ -467,8 +471,8 @@ conf_dist <- function(
     stop("Please provide the sample size for correlations and proportions.")
   }
 
-  if ((type %in% c("pearson", "spearman") && any(n < 4)) || (type %in% c("kendall") && any(n < 5))){
-    stop("Sample size must be at least 4 for Pearson and Spearman and at least 5 for Kendall's correlation.")
+  if ((type %in% c("pearson") && any(n < 3)) || (type %in% c("spearman") && any(n < 4)) || (type %in% c("kendall") && any(n < 5))){
+    stop("Sample size must be at least 3 for Pearson, at least 4 for Spearman and at least 5 for Kendall's correlation.")
   }
 
   if (type %in% c("var") && is.null(n)){
@@ -563,22 +567,36 @@ conf_dist <- function(
     # Ref 1: Bonett & Wright (2000): Sample size requirements for estimating Pearson, Kendall and Spearman correlations
     # Ref 2: Fieller, Hartley, Pearson (1957): Tests for rank correlation coefficients I.
 
-    stderr <- switch(
-      type
-      , pearson = 1/sqrt(n - 3)
-      , spearman = sqrt((1 + (estimate)^2/2)/(n - 3))
-      , kendall = sqrt(0.437/(n - 4))
-    )
+    if (type %in% c("spearman", "kendall")) { # Use approximations for Spearman and Kendall
 
-    res <- cdist_corr(
-      estimate = estimate
-      , stderr = stderr
-      , n = n
-      , n_values = n_values
-      , conf_level = conf_level
-      , null_values = null_values
-      , alternative = alternative
-    )
+      stderr <- switch(
+        type
+        , pearson = 1/sqrt(n - 3)
+        , spearman = sqrt((1 + (estimate)^2/2)/(n - 3))
+        , kendall = sqrt(0.437/(n - 4))
+      )
+
+      res <- cdist_corr(
+        estimate = estimate
+        , stderr = stderr
+        , n = n
+        , n_values = n_values
+        , conf_level = conf_level
+        , null_values = null_values
+        , alternative = alternative
+      )
+
+    } else if (type %in% "pearson") { # Use exact distribution for Pearson
+
+      res <- cdist_corr_exact(
+        estimate = estimate
+        , n = n
+        , n_values = n_values
+        , conf_level = conf_level
+        , null_values = null_values
+        , alternative = alternative
+      )
+    }
 
   } else if (type %in% "var") {
 
@@ -642,29 +660,84 @@ conf_dist <- function(
 
   #-----------------------------------------------------------------------------
   # Calculate AUCC (area under the confidence curve), see Berrar (2017) Mach Learn 106:911-494
+  # Also calculate the area above the null values
   #-----------------------------------------------------------------------------
 
-  res$aucc_frame <- data.frame(
-    variable = est_names
-    , aucc = NA
-  )
+  if (!is.null(null_values)) {
 
-  for(i in seq_along(estimate)) {
-
-    x_tmp <- res$res_frame$values[res$res_frame$variable %in% est_names[i]]
-    y_tmp <- res$res_frame$p_two[res$res_frame$variable %in% est_names[i]]
-
-    nona_ind <- which(!is.na(y_tmp) & !is.na(x_tmp))
-
-    order_tmp <- order(res$res_frame$values[res$res_frame$variable %in% est_names[i]][nona_ind], decreasing = FALSE)
-
-    res$aucc_frame$aucc[res$aucc_frame$variable %in% est_names[i]] <- pracma::trapz(
-      x = x_tmp[nona_ind][order_tmp]
-      , y = y_tmp[nona_ind][order_tmp]
+    res$aucc_frame <- data.frame(
+      variable = rep(est_names, each = length(null_values))
+      , aucc = NA
+      , null = rep(null_values, times = length(est_names))
+      , p_above_null = NA
     )
 
-    rm(x_tmp, y_tmp, nona_ind, order_tmp)
+    for(i in seq_along(estimate)) {
 
+      x_tmp <- res$res_frame$values[res$res_frame$variable %in% est_names[i]]
+      y_tmp <- res$res_frame$p_two[res$res_frame$variable %in% est_names[i]]
+
+      nona_ind <- which(!is.na(y_tmp) & !is.na(x_tmp))
+
+      order_tmp <- order(res$res_frame$values[res$res_frame$variable %in% est_names[i]][nona_ind], decreasing = FALSE)
+
+      res$aucc_frame$aucc[res$aucc_frame$variable %in% est_names[i]] <- pracma::trapz(
+        x = x_tmp[nona_ind][order_tmp]
+        , y = y_tmp[nona_ind][order_tmp]
+      )
+
+      rm(x_tmp, y_tmp, nona_ind, order_tmp)
+
+      for (j in seq_along(null_values)) {
+
+        x_tmp <- res$res_frame$values[res$res_frame$variable %in% est_names[i]]
+        y_tmp <- res$res_frame$p_two[res$res_frame$variable %in% est_names[i]]
+
+        above_null_ind <- which(res$res_frame$values[res$res_frame$variable %in% est_names[i]] > null_values[j])
+
+        x_tmp <- x_tmp[above_null_ind]
+        y_tmp <- y_tmp[above_null_ind]
+
+        nona_ind <- which(!is.na(y_tmp) & !is.na(x_tmp))
+
+        order_tmp <- order(res$res_frame$values[res$res_frame$variable %in% est_names[i]][above_null_ind][nona_ind], decreasing = FALSE)
+
+        aucc_above_null <- pracma::trapz(
+          x = x_tmp[nona_ind][order_tmp]
+          , y = y_tmp[nona_ind][order_tmp]
+        )
+
+        res$aucc_frame$p_above_null[res$aucc_frame$variable %in% est_names[i] & res$aucc_frame$null == null_values[j]] <- aucc_above_null/res$aucc_frame$aucc[res$aucc_frame$variable %in% est_names[i] & res$aucc_frame$null == null_values[j]]
+
+        rm(x_tmp, y_tmp, nona_ind, order_tmp, aucc_above_null)
+
+      }
+    }
+
+  } else {
+
+    res$aucc_frame <- data.frame(
+      variable = est_names
+      , aucc = NA
+    )
+
+    for(i in seq_along(estimate)) {
+
+      x_tmp <- res$res_frame$values[res$res_frame$variable %in% est_names[i]]
+      y_tmp <- res$res_frame$p_two[res$res_frame$variable %in% est_names[i]]
+
+      nona_ind <- which(!is.na(y_tmp) & !is.na(x_tmp))
+
+      order_tmp <- order(res$res_frame$values[res$res_frame$variable %in% est_names[i]][nona_ind], decreasing = FALSE)
+
+      res$aucc_frame$aucc[res$aucc_frame$variable %in% est_names[i]] <- pracma::trapz(
+        x = x_tmp[nona_ind][order_tmp]
+        , y = y_tmp[nona_ind][order_tmp]
+      )
+
+      rm(x_tmp, y_tmp, nona_ind, order_tmp)
+
+    }
   }
 
   #-----------------------------------------------------------------------------
@@ -1795,6 +1868,192 @@ cdist_corr <- function(
 
 }
 
+cdist_corr_exact <- function(
+  estimate = NULL
+  , n = NULL
+  , n_values = NULL
+  , conf_level = NULL
+  , null_values = NULL
+  , alternative = NULL
+){
+
+  # Define function for the exact density (see Taraldsen 2020)
+  conf_dens_corr <- function(rho, r, n) {
+    nu <- (n - 1)
+    (nu*(nu - 1)*gamma(nu - 1))/(sqrt(2*pi)*gamma(nu + (1/2)))*(1 - r^2)^((nu - 1)/2)*(1 - rho^2)^((nu - 2)/2)*(1 - r*rho)^((1 - 2*nu)/2)*gsl::hyperg_2F1(-1/2, 3/2, nu + (1/2), (1 + r*rho)/2, strict = FALSE)
+  }
+  # The cdf is obtained by numerical integration of the pdf
+  cdf_dist <- function(z, r, n) {
+    nu <- (n - 1)
+    sapply(z, FUN = function(z, r, n) {integrate(conf_dens_corr, lower = -1, upper = z, r = r, n = n, subdivisions = 1000L)$value}, r = r, n = n)
+  }
+
+  # Function to find confidence intervals based on the cdf
+  find_ci <- function(conf_level, r, n, alternative) {
+
+    quants_tmp <- switch(
+      alternative
+      , two_sided = c(1 - (conf_level + 1)/2, (conf_level + 1)/2)
+      , one_sided = c((1 - conf_level), conf_level)
+    )
+
+    lower_fun <- function(z, r, n) {
+      cdf_dist(z = z, r = r, n = n) - quants_tmp[1]
+    }
+    upper_fun <- function(z, r, n) {
+      cdf_dist(z = z, r = r, n = n) - quants_tmp[2]
+    }
+    c(
+      uniroot(lower_fun, interval = c(-1, 1), r = r, n = n, maxiter = 2000)$root
+      , uniroot(upper_fun, interval = c(-1, 1), r = r, n = n, maxiter = 2000)$root
+    )
+  }
+
+  # Function to find counternull values
+  find_counternulls <- function(null_values, r, n) {
+
+    null_values_cdf <- cdf_dist(null_values, r = r, n = n)
+
+    zero_fun <- function(x, null_values_cdf, r = r, n = n) {
+      (1 - cdf_dist(x, r = r, n = n)) - null_values_cdf
+    }
+    uniroot(zero_fun, r = r, n = n, null_values_cdf = null_values_cdf, interval = c(-1, 1))$root
+  }
+
+  res_mat <- matrix(NA, nrow = 0, ncol = 6)
+
+  conf_mat <- matrix(NA, nrow = 0, ncol = 4)
+
+  counternull_mat <- matrix(NA, nrow = 0, ncol = 3)
+
+  for (i in seq_along(estimate)) {
+
+    limits <- c(-1, 1)
+
+    x_calc <- c(estimate[i], null_values, seq(limits[1], limits[2], length.out = (n_values + 2)))
+    x_calc <- x_calc[!(x_calc %in% c(-1, 1))]
+
+    res_mat_tmp <- matrix(NA, nrow = length(x_calc), ncol = 6)
+
+    res_mat_tmp[, 1] <- x_calc
+    res_mat_tmp[, 2] <- cdf_dist(x_calc, r = estimate[i], n = n[i])
+    res_mat_tmp[, 3] <- conf_dens_corr(x_calc, r = estimate[i], n = n[i])
+    res_mat_tmp[, 4] <- 1 - 2*abs(res_mat_tmp[, 2] - (1/2))
+    res_mat_tmp[, 5] <- (1/2) - abs(res_mat_tmp[, 2] - (1/2))
+    res_mat_tmp[, 6] <- rep(i, length(x_calc))
+
+    res_mat <- rbind(res_mat, res_mat_tmp)
+
+    # Confidence intervals
+
+    if (!is.null(conf_level)) {
+
+      conf_mat_tmp <- matrix(NA, ncol = 4, nrow = length(conf_level))
+
+      limits_tmp <- vapply(conf_level, FUN = find_ci, r = estimate[i], n = n[i], alternative = alternative, FUN.VALUE = double(2L))
+
+      conf_mat_tmp[, 1] <- conf_level
+      conf_mat_tmp[, 2] <- limits_tmp[1, ]
+      conf_mat_tmp[, 3] <- limits_tmp[2, ]
+      conf_mat_tmp[, 4] <- rep(i, length(conf_level))
+
+      conf_mat <- rbind(conf_mat, conf_mat_tmp)
+
+    }
+
+    # Counternulls
+
+    if (!is.null(null_values)) {
+
+      counternull_mat_tmp <- matrix(NA, ncol = 3, nrow = length(null_values))
+
+      counternulls_tmp <- vapply(null_values, find_counternulls, r = estimate[i], n = n[i], FUN.VALUE = double(1L))
+
+      counternull_mat_tmp[, 1] <- null_values
+      counternull_mat_tmp[, 2] <- counternulls_tmp
+      counternull_mat_tmp[, 3] <- rep(i, length(null_values))
+
+      counternull_mat <- rbind(counternull_mat, counternull_mat_tmp)
+
+    }
+  }
+
+  res_frame <- as.data.frame(res_mat)
+
+  names(res_frame) <- c("values", "conf_dist", "conf_dens", "p_two", "p_one", "variable")
+
+  if (!is.null(conf_level)) {
+
+    conf_frame <- as.data.frame(conf_mat)
+
+    names(conf_frame) <- c("conf_level", "lwr", "upr", "variable")
+
+  } else {
+    conf_frame <- NULL
+  }
+
+  if (!is.null(null_values)) {
+
+    counternull_frame <- as.data.frame(counternull_mat)
+
+    names(counternull_frame) <- c("null_value", "counternull", "variable")
+
+  } else {
+    counternull_frame <- NULL
+  }
+
+  # Point estimators
+
+  point_est_frame <- data.frame(
+    est_mean = rep(NA, length(estimate))
+    , est_median = rep(NA, length(estimate))
+    , est_mode = rep(NA, length(estimate))
+    , variable = seq(1, i, 1)
+  )
+
+  # The mean is obtained by numerical integration
+  mean_fun <- function(r, n) {
+    int_fun <- function(rho, r = r, n = n) {
+      rho*conf_dens_corr(rho = rho, r = r, n = n)
+    }
+    integrate(int_fun, lower = -1, upper = 1, r = estimate[i], n = n[i], rel.tol = 1e-10)$value
+  }
+
+  # The median is found by numerical root-finding using the cdf
+  median_fun <- function(r, n) {
+    zero_fun <- function(x, r = r, n = n) {
+      cdf_dist(x, r = r, n = n) - (1/2)
+    }
+    uniroot(zero_fun, r = r, n = n, interval = c(-1, 1))$root
+  }
+
+  # Find the root of the derivative of the pdf numerically
+  mode_fun <- function(r, n) {
+    pdf_deriv <- function(rho, r = r, n = n) {
+      nu <- (n - 1)
+      -1/(8*sqrt(2*pi))*(1 - r^2)^(1/2*(nu - 1))*(nu - 1)*nu*(1 - r*rho)^(-1/2 - nu)*(1 - rho^2)^(1/2*(nu - 4))*gamma(nu - 1)*(4*(2*(nu - 2)*rho + r*(1 - 2*nu + 3*rho^2))*(gsl::hyperg_2F1(-1/2, 3/2, 1/2 + nu, 1/2*(1 + r*rho), strict = FALSE))/gamma(1/2 + nu) + 3*r*(r*rho - 1)*(rho^2 - 1)*(gsl::hyperg_2F1(1/2, 5/2, 3/2 + nu, 1/2*(1 + rho*r), strict = FALSE)/gamma(3/2 + nu)))
+    }
+    uniroot(pdf_deriv, r = r, n = n, lower = -0.99999, upper = 0.99999)$root
+  }
+
+  for (i in seq_along(estimate)) {
+
+    point_est_frame$est_mean[i] <- mean_fun(r = estimate[i], n = n[i])
+      point_est_frame$est_median[i] <- median_fun(r = estimate[i], n = n[i])
+    point_est_frame$est_mode[i] <- mode_fun(r = estimate[i], n = n[i])
+
+  }
+
+  return(list(
+    res_frame = res_frame
+    , conf_frame = conf_frame
+    , counternull_frame = counternull_frame
+    , point_est = point_est_frame
+  ))
+
+}
+
+
 cdist_var <- function(
   estimate = NULL
   , n = NULL
@@ -2085,7 +2344,8 @@ cdist_prop1 <- function(
       counternull_mat_tmp <- matrix(NA, ncol = 3, nrow = length(null_values))
 
       counternull_mat_tmp[, 1] <- null_values
-      counternull_mat_tmp[, 2] <- sapply(counter_tmp, function(x, cdf, q){x[which.min(abs(cdf - q))]}, x = x_calc, cdf = res_mat_tmp[, 2])
+      # counternull_mat_tmp[, 2] <- sapply(counter_tmp, function(x, cdf, q){x[which.min(abs(cdf - q))]}, x = x_calc, cdf = res_mat_tmp[, 2])
+      counternull_mat_tmp[, 2] <- vapply(counter_tmp, function(x, cdf, q){x[which.min(abs(cdf - q))]}, x = x_calc, cdf = res_mat_tmp[, 2], FUN.VALUE = double(1L))
       counternull_mat_tmp[, 3] <- rep(i, length(null_values))
 
       counternull_mat <- rbind(counternull_mat, counternull_mat_tmp)
@@ -2170,7 +2430,8 @@ cdist_propdiff <- function(
   # limits <- wilson_cicc_diff(estimate = estimate, n = n, conf_level = (1 - eps), alternative = alternative)
 
   conf_levels <- seq(eps, 1 - eps, length.out = ceiling(n_values/2))
-  x_calc <- sapply(conf_levels, wilson_cicc_diff, estimate = estimate, n = n, alternative = alternative)
+  # x_calc <- sapply(conf_levels, wilson_cicc_diff, estimate = estimate, n = n, alternative = alternative)
+  x_calc <- vapply(conf_levels, wilson_cicc_diff, estimate = estimate, n = n, alternative = alternative, FUN.VALUE = double(2L))
 
   val_min <- wilson_cicc_diff(estimate, n, conf_level = eps)
   val_between <- seq(min(val_min), max(val_min), length.out = 100)
@@ -2261,7 +2522,6 @@ cdist_propdiff <- function(
         }
       }
     }
-
 
     counternull_mat_tmp <- matrix(NA, ncol = 3, nrow = length(null_values))
     counternull_mat_tmp[, 1] <- null_values
@@ -2366,22 +2626,3 @@ magnify_trans_log_rev <- function(interval_low = 0.05, interval_high = 1,  reduc
 
   trans_new(name = 'customlog_rev', transform = trans, inverse = inv, domain = c(1e-16, Inf))
 }
-
-# # Surprisal transformation
-#
-# trans_surprisal <- function() {
-#
-#   trans <- Vectorize(function(x) {
-#     if(!is.na(x)) {
-#       -log2(x)
-#     }
-#   })
-#
-#   inv <- Vectorize(function(x) {
-#     if(!is.na(x)) {
-#       2^(-x)
-#     }
-#   })
-#
-#   trans_new(name = 'surprisal', transform = trans, inverse = inv, domain = c(1e-16, Inf))
-# }

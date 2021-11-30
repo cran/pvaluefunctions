@@ -60,6 +60,7 @@ The function depends on the following R packages:
 * [scales](https://cran.r-project.org/package=scales)
 * [zipfR](https://cran.r-project.org/package=zipfR)
 * [pracma](https://cran.r-project.org/package=pracma)
+* [gsl](https://cran.r-project.org/package=gsl)
 
 ## Usage
 
@@ -83,7 +84,7 @@ There is only one function needed to create the plots: `conf_dist()`. The functi
 * `xlim` (optional) Optional numerical vector of length 2 (x1, x2) indicating the limits of the x-axis on the *untransformed* scale. For example: If you want to plot *p*-value functions for odds ratios from logistic regressions, the limits have to be given on the log-odds scale. Note that x1 > x2 is allowed but then x2 will be the left limit and x1 the right limit (i.e. the limits are sorted before plotting). Null values (specified in `null_values`) that are outside of the specified limits are ignored and a message is printed.
 * `together`: Logical. Indicating if graphics for multiple estimates should be displayed together or on separate plots.
 * `plot_legend` Logical. Indicating if a legend should be plotted if multiple curves are plotted together with different colors (i.e. `together = TRUE` and `same_color = FALSE`).
-* `same_color`: Logical. Indicating if curves should be distinguished using colors if they are plotted together (i.e. `together = TRUE`).
+* `same_color`: Logical. Indicating if curves should be distinguished using colors if they are plotted together (i.e. `together = TRUE`). Setting this to `FALSE` also disables the default behavior that the two halves of the curves are plotted in different colors for a one-sided alternative.
 * `col` String indicating the colour of the curves. Only relevant for single curves, multiple curves not plotted together (i.e. `together = FALSE`) and multiple curves plotted together but with the option `same_color` set to `TRUE`.
 * `nrow`: (optional) Integer greater than 0 indicating the number of rows when `together = FALSE` is specified for multiple estimates. Used in `facet_wrap` in ggplot2.
 * `ncol`: (optional) Integer greater than 0 indicating the number of columns when `together = FALSE` is specified for multiple estimates. Used in `facet_wrap` in ggplot2.
@@ -112,7 +113,7 @@ The main function `conf_dist()` returns five objects in a list:
 * `conf_frame`: A data frame containing the confidence intervals for the specified confidence levels for all estimates.
 * `counternull_frame`: A data frame containing the counternull values for the specified null values (see Rosenthal & Rubin (1994) for more information about the counternull).
 * `point_est`: A data frame containing the point estimates for all estimates. The point estimates correspond to the mean, median or mode of the confidence density (see Xie & Singh (2013) for more information). Estimates are produced using numerical procedures: Increase the number of points `n_values` for higher numerical precision.
-* `aucc_frame`: A data frame containing the estimated AUCC (area under the confidence curves). The AUCC is a measures of precision with higher values indicating a poorer precision compared to smaller values (see Berrar (2017)).
+* `aucc_frame`: A data frame containing the estimated AUCC (area under the confidence curve). The AUCC is a measures of precision with higher values indicating a poorer precision compared to smaller values (see Berrar (2017)). It also provides the proportion of the AUCC that lies above the null value(s), if they are provided.
 * `plot`: A [ggplot2](https://ggplot2.tidyverse.org/) plot object (only returned if the option `plot = TRUE` was specified).
 
 ## Examples
@@ -278,6 +279,8 @@ res <- conf_dist(
 
 ### Pearson correlation coefficient (one-sided)
 
+As of version 1.6.2, the package uses the exact distribution for Pearson's correlation coefficient as described in a preprint by Gunnar Taraldsen (2020). The calculations make use of the Gaussian hypergeometric function ($_2F_1$). It also makes the calculations slower, depending on the value in `n_values`.
+
 ```{r corr_pearson, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
 #-----------------------------------------------------------------------------
 # Calculate Pearson's correlation coefficient
@@ -294,7 +297,7 @@ res <- conf_dist(
   , n = 47
   , type = "pearson"
   , plot_type = "p_val"
-  , n_values = 1e4L
+  , n_values = 1e3L
   # , est_names = c("")
   , conf_level = c(0.95, 0.90, 0.80)
   , null_values = c(0)
@@ -558,7 +561,7 @@ rm(rse_fun, rse_fun_inv)
 
 
 ### Comparing the precision of multiple estimates using the AUCC (area under the confidence curve)
-The AUCC is a scalar representing the area under the *p*-value function (see Berrar (2017)). Values close to 0 indicate a high precision while larger values indicate poorer precision. Multiple estimates can be compared by their AUCC (in the context of a meta-analysis for example). The AUCC is calculated numerically using trapezoidal integration on the untransformed *p*-value function. The estimate can be quite poor if few x-values are used (i.e. argument `n_values` is low).
+The AUCC is a scalar representing the area under the *p*-value function (see Berrar (2017)). Values close to 0 indicate a high precision while larger values indicate poorer precision. Multiple estimates can be compared by their AUCC (in the context of a meta-analysis for example). The AUCC is calculated numerically using trapezoidal integration on the untransformed *p*-value function. The estimate can be quite poor if few x-values are used (i.e. argument `n_values` is low). If there are null values provided, the function will also return the proportion of the AUCC that lies above those nulls.
 
 ```{r aucc_comparison, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200}
 
