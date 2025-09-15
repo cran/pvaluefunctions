@@ -1,12 +1,12 @@
-32837bc281b465ed1af4439b151d7c63 *DESCRIPTION
+3c572793c535ab06e89501017a3c0323 *DESCRIPTION
 f4e77ba3810347894cacc5e5b68da3c0 *NAMESPACE
-409a21926571315e58aae37904f3f55c *NEWS.md
-b8560bebbdde1daa2bbf22b3670c4209 *R/confidence_distributions.R
+ea06faceb29eac58218f1102e918fc08 *NEWS.md
+4f0df4f53d6cd65b72691ac904fe3fec *R/confidence_distributions.R
 4be5dccc369aabd4bbe7493ff5e27e2a *README.md
-5bb5c4f1acd3494e8d44a18b3e3d078a *build/vignette.rds
-eccb919487b39be4ed72c20b155a2ff1 *inst/doc/pvaluefun.R
-490d8108cd3dee5ea98fdc5ca6e4279f *inst/doc/pvaluefun.Rmd
-3080ce54a8b459e5247bcd1690b42974 *inst/doc/pvaluefun.html
+13ef1b7f41610f5b5fed57a5f2e1fb14 *build/vignette.rds
+9d640b213f18cec15ab180f3e23a2a6b *inst/doc/pvaluefun.R
+15cd47818472fed2dd54edfb4938950e *inst/doc/pvaluefun.Rmd
+98e8e7c2ea420d3018f092365435f813 *inst/doc/pvaluefun.html
 5dd654a7b740545626c9d6d2ad9e9374 *man/conf_dist.Rd
 88bdde22ba62ba30bb5e4a3c522d534b *man/figures/README-benderfig1-1.png
 b87a13eda571d9b6088a66b000253639 *man/figures/README-ttest_pval-1.png
@@ -14,5 +14,5 @@ b87a13eda571d9b6088a66b000253639 *man/figures/README-ttest_pval-1.png
 70f0280813823dfe841f21813465f121 *man/figures/logo.svg
 f8ad09a83a4bae484432532e94a6c95d *man/figures/logo2.svg
 6c63de340dda5bfb650d755e6629e117 *man/figures/logo3.svg
-490d8108cd3dee5ea98fdc5ca6e4279f *vignettes/pvaluefun.Rmd
+15cd47818472fed2dd54edfb4938950e *vignettes/pvaluefun.Rmd
 7b31f17bb2317e74c3ffe9cbf760edfa *vignettes/pvaluefun.md

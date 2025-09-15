@@ -8,11 +8,11 @@ knitr::opts_chunk$set(
 library(pvaluefunctions)
 
 ## ----source_github, message = FALSE, warning = FALSE, echo = FALSE, eval = FALSE----
-#  library(devtools)
-#  
-#  # Load function
-#  source_url("https://raw.githubusercontent.com/DInfanger/pvaluefunctions/master/R/confidence_distributions.R")
-#  
+# library(devtools)
+# 
+# # Load function
+# source_url("https://raw.githubusercontent.com/DInfanger/pvaluefunctions/master/R/confidence_distributions.R")
+# 
 
 ## ----ttest, message = FALSE, warning = FALSE, fig.width = 9, fig.height = 7, out.width = "80%", fig.align='center', dev = "png", dpi = 200----
 #-----------------------------------------------------------------------------
